@@ -4,11 +4,9 @@ use sdl2::rect::Rect;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
 
-//use CHIP8_WIDTH; later after CPU been implemented
-//use CHIP8_HEIGHT;
+use CHIP8_WIDTH; later after CPU been implemented
+use CHIP8_HEIGHT;
 
-const CHIP8_WIDTH: u8 = 64;
-const CHIP8_HEIGHT: u8 = 32;
 
 const SCALE_FACTOR: u8 = 20;
 const SCREEN_WIDTH: u8 = (CHIP8_WIDTH as u32) * SCALE_FACTOR;
@@ -34,9 +32,41 @@ impl GraphicDriver {
                 .unwrap(); // Should return 
 
         let mut canvas = window.into_canvas().build().unwrap();
-                
         
+        // Configure canvas
+        canvas.set_draw_color(pixels::Color::RGB(0,0,0));
+        canvas.clear(); // clear canvas
+        canvas.present(); // Bring canvas to front buffer
+
+        GraphicDriver{ canvas: canvas }
+    }
+
+    pub fn draw(&mut self, pixels: &[[u8; CHIP8_WIDTH]; CHIP8_HEIGHT]) {
+        for (y,row) in pixels.iter().enumerate() {
+            for (x,&col) in row.iter().enumerate() {
+
+                let x = (x as u32) * SCALE_FACTOR;
+                let y = (y as u32) * SCALE_FACTOR;
+
+                self.canvas.set_draw_color(color(col));
+                let _ = self.canvas
+                        .fill_rect(Rect::new(x as i32, y as i32, SCALE_FACTOR, SCALE_FACTOR); // want to fill rectangle (pixel) at that particular address
+                }
+        }
         
+        self.canvas.present(); // Bring canvas to front
+        
+    }
+}
+        
+fn color(p: u8) { // There are only 2 colors: blank or non-blank
+    if p == 0 {
+        pixels::Color::RGB(0,0,0)
+    } else {
+        pixels::Color::RGB(0,250,0)
+    }
+    // Can update this function if we want more color
+}
         
         
 
