@@ -198,20 +198,29 @@ impl CPU {
 		ProgramCounter::Next
 	}
 
-	// 00EE RET -> Return from subroutine
+	// 00EE: RET -> Return from subroutine
 	// The interpreter sets the program counter to the address at the top of the stack, then subtracts 1 from the stack pointer.
 	fn op_00ee(&mut self) -> ProgramCounter {
 		self.sp -= 1;
 		ProgramCounter::Jump(self.stack[self.sp])
 	}
 
-	// 1nnn - JP addr -> Jump to location nnn
+	// 1nnn; JP addr -> Jump to location nnn
 	// The interpreter sets the program counter to nnn.
-	fn op_1nnn(&mut self, nnn : u16) -> ProgramCounter {
-		ProgramCounter:;Jump(nnn)
+	fn op_1nnn(&mut self, nnn: u16) -> ProgramCounter {
+		ProgramCounter::Jump(nnn)
 	}
 
+	// 2nnn: CALL addr -> Call subroutine at nnn.
+	// The interpreter increments the stack pointer, then puts the current PC on the top of the stack. The PC is then set to nnn.
+	fn op_2nnn(&mut self, nnn: u16) -> ProgramCounter {
+		self.stack[self.sp] = self.pc + 2; //OPCODE_SIZE
+		self.sp += 1;
+		ProgramCounter::Jump(nnn)
+	}
 
+	// 3xkk: SE Vx, byte -> Skip next instruction if Vx = kk.
+	// The interpreter compares register Vx to kk, and if they are equal, increments the program counter by 2.
 
 }
 
