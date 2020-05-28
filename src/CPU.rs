@@ -291,7 +291,11 @@ impl CPU {
 
 	// 8xy3 - XOR Vx, Vy -> Set Vx = Vx XOR Vy.
 	// Performs a bitwise exclusive OR on the values of Vx and Vy, then stores the result in Vx. 
-
+	fn op_8xy3(&mut self, x: u8, y: u8) -> ProgramCounter {
+		// TODO: Might have error due to borrowing
+		self.v[x] = self.v[x] ^ self.v[y];
+		ProgramCounter::Next
+	}
 
 	// 8xy4 - ADD Vx, Vy -> Set Vx = Vx + Vy, set VF = carry.
 	// The values of Vx and Vy are added together. If the result is greater than 8 bits (i.e., > 255,) VF is set to 1, otherwise 0. Only the lowest 8 bits of the result are kept, and stored in Vx.
