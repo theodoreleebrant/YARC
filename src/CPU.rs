@@ -539,6 +539,10 @@ impl CPU {
 
 }
 
+#[cfg(test)]
+#[path = "./tests/CPU_test.rs"]
+mod CPU_test;
+
 // 3.2 - Super Chip-48 Instructions           [TOC]
 
 // 00Cn - SCD nibble
