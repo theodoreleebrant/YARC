@@ -306,92 +306,32 @@ impl CPU {
 	// The values of Vx and Vy are compared, and if they are not equal, the program counter is increased by 2.
 
 
+	// Annn - LD I, addr
+	// Set I = nnn.
+
+	// The value of register I is set to nnn.
 
 
+	// Bnnn - JP V0, addr
+	// Jump to location nnn + V0.
+
+	// The program counter is set to nnn plus the value of V0.
 
 
+	// Cxkk - RND Vx, byte
+	// Set Vx = random byte AND kk.
 
-// OPCODE LIST
-// 0nnn - SYS addr
-// Jump to a machine code routine at nnn.
-
-// This instruction is only used on the old computers on which Chip-8 was originally implemented. It is ignored by modern interpreters.
+	// The interpreter generates a random number from 0 to 255, which is then ANDed with the value kk. The results are stored in Vx. See instruction 8xy2 for more information on AND.
 
 
-// 00E0 - CLS
-// Clear the display.
+	// Dxyn - DRW Vx, Vy, nibble
+	// Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision.
+
+	// The interpreter reads n bytes from memory, starting at the address stored in I. These bytes are then displayed as sprites on screen at coordinates (Vx, Vy). Sprites are XORed onto the existing screen. If this causes any pixels to be erased, VF is set to 1, otherwise it is set to 0. If the sprite is positioned so part of it is outside the coordinates of the display, it wraps around to the opposite side of the screen. See instruction 8xy3 for more information on XOR, and section 2.4, Display, for more information on the Chip-8 screen and sprites.
 
 
-// 00EE - RET
-// Return from a subroutine.
-
-// The interpreter sets the program counter to the address at the top of the stack, then subtracts 1 from the stack pointer.
-
-
-// 1nnn - JP addr
-// Jump to location nnn.
-
-// The interpreter sets the program counter to nnn.
-
-
-// 2nnn - CALL addr
-// Call subroutine at nnn.
-
-// The interpreter increments the stack pointer, then puts the current PC on the top of the stack. The PC is then set to nnn.
-
-
-// 3xkk - SE Vx, byte
-// Skip next instruction if Vx = kk.
-
-// The interpreter compares register Vx to kk, and if they are equal, increments the program counter by 2.
-
-
-// 4xkk - SNE Vx, byte
-// Skip next instruction if Vx != kk.
-
-// The interpreter compares register Vx to kk, and if they are not equal, increments the program counter by 2.
-
-
-// 5xy0 - SE Vx, Vy
-// Skip next instruction if Vx = Vy.
-
-// The interpreter compares register Vx to register Vy, and if they are equal, increments the program counter by 2.
-
-
-// 6xkk - LD Vx, byte
-// Set Vx = kk.
-
-// The interpreter puts the value kk into register Vx.
-
-
-
-
-// Annn - LD I, addr
-// Set I = nnn.
-
-// The value of register I is set to nnn.
-
-
-// Bnnn - JP V0, addr
-// Jump to location nnn + V0.
-
-// The program counter is set to nnn plus the value of V0.
-
-
-// Cxkk - RND Vx, byte
-// Set Vx = random byte AND kk.
-
-// The interpreter generates a random number from 0 to 255, which is then ANDed with the value kk. The results are stored in Vx. See instruction 8xy2 for more information on AND.
-
-
-// Dxyn - DRW Vx, Vy, nibble
-// Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision.
-
-// The interpreter reads n bytes from memory, starting at the address stored in I. These bytes are then displayed as sprites on screen at coordinates (Vx, Vy). Sprites are XORed onto the existing screen. If this causes any pixels to be erased, VF is set to 1, otherwise it is set to 0. If the sprite is positioned so part of it is outside the coordinates of the display, it wraps around to the opposite side of the screen. See instruction 8xy3 for more information on XOR, and section 2.4, Display, for more information on the Chip-8 screen and sprites.
-
-
-// Ex9E - SKP Vx
-// Skip next instruction if key with the value of Vx is pressed.
+	// Ex9E - SKP Vx
+	// Skip next instruction if key with the value of Vx is pressed.
     fn op_ex9e(&mut self, x: u8) {
         if keypad[v[x]] {
             self.pc += OPCODE_SIZE;
@@ -399,8 +339,8 @@ impl CPU {
         self.pc += OPCODE_SIZE;
     }
 
-// ExA1 - SKNP Vx
-// Skip next instruction if key with the value of Vx is not pressed.
+	// ExA1 - SKNP Vx
+	// Skip next instruction if key with the value of Vx is not pressed.
     fn op_exa1(&mut self, x: u8) {
         if !keypad[v[x]] {
             self.pc += OPCODE_SIZE;
