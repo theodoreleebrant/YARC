@@ -326,6 +326,10 @@ impl CPU {
 
 	// 8xy7 - SUBN Vx, Vy -> Set Vx = Vy - Vx, set VF = NOT borrow.
 	// If Vy > Vx, then VF is set to 1, otherwise 0. Then Vx is subtracted from Vy, and the results stored in Vx.
+	fn op_8xy7(&mut self, x: u8, y:u8) -> ProgramCounter {
+		self.v[0xF] = if self.v[y] > self.v[x] {1} else {0};
+		self.v[x] = self.v[y].wrapping_sub(self.v[x]);
+	}
 
 	// 8xyE - SHL Vx {, Vy} -> Set Vx = Vx SHL 1.
 	// If the most-significant bit of Vx is 1, then VF is set to 1, otherwise to 0. Then Vx is multiplied by 2.
