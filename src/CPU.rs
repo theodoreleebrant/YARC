@@ -258,8 +258,6 @@ impl CPU {
 		ProgramCounter::Next
 	}
 
-<<<<<<< HEAD
-=======
 	// 7xkk - ADD Vx, byte -> Set Vx = Vx + kk.
 	// Adds the value kk to the value of register Vx, then stores the result in Vx.
 	fn op_7xkk(&mut self, x: u8, kk: u8) -> ProgramCounter {
@@ -306,10 +304,6 @@ impl CPU {
 
 	// 9xy0 - SNE Vx, Vy -> Skip next instruction if Vx != Vy.
 	// The values of Vx and Vy are compared, and if they are not equal, the program counter is increased by 2.
-
-}
->>>>>>> 6db16a7420760b0bba7d2a00e1d0afeecf1ebb05
-
 
 
 
