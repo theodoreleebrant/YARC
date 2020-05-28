@@ -268,27 +268,53 @@ impl CPU {
 
 	// 8xy0 - LD Vx, Vy -> Set Vx = Vy.
 	// Stores the value of register Vy in register Vx.
-
+	fn op_8xy0(&mut self, x: u8, y: u8) -> ProgramCounter {
+		self.v[x] = self.v[y];
+		ProgramCounter::Next
+	}
 
 	// 8xy1 - OR Vx, Vy -> Set Vx = Vx OR Vy.
-	// Performs a bitwise OR on the values of Vx and Vy, then stores the result in Vx. A bitwise OR compares the corrseponding bits from two values, and if either bit is 1, then the same bit in the result is also 1. Otherwise, it is 0.
-
+	// Performs a bitwise OR on the values of Vx and Vy, then stores the result in Vx. 
+	fn op_8xy1(&mut self, x: u8, y: u8) -> ProgramCounter {
+		// TODO: Might have error due to borrowing
+		self.v[x] = self.v[x] | self.v[y];
+		ProgramCounter::Next
+	}
 
 	// 8xy2 - AND Vx, Vy -> Set Vx = Vx AND Vy.
-	// Performs a bitwise AND on the values of Vx and Vy, then stores the result in Vx. A bitwise AND compares the corrseponding bits from two values, and if both bits are 1, then the same bit in the result is also 1. Otherwise, it is 0.
-
+	// Performs a bitwise AND on the values of Vx and Vy, then stores the result in Vx. 
+	fn op_8xy2(&mut self, x: u8, y: u8) -> ProgramCounter {
+		self.v[x] = self.v[x] & self.v[y];
+		ProgramCounter::Next
+	}
 
 	// 8xy3 - XOR Vx, Vy -> Set Vx = Vx XOR Vy.
-	// Performs a bitwise exclusive OR on the values of Vx and Vy, then stores the result in Vx. An exclusive OR compares the corrseponding bits from two values, and if the bits are not both the same, then the corresponding bit in the result is set to 1. Otherwise, it is 0.
-
+	// Performs a bitwise exclusive OR on the values of Vx and Vy, then stores the result in Vx. 
+	fn op_8xy3(&mut self, x: u8, y: u8) -> ProgramCounter {
+		self.v[x] = self.v[x] ^ self.v[y];
+		ProgramCounter::Next
+	}
 
 	// 8xy4 - ADD Vx, Vy -> Set Vx = Vx + Vy, set VF = carry.
 	// The values of Vx and Vy are added together. If the result is greater than 8 bits (i.e., > 255,) VF is set to 1, otherwise 0. Only the lowest 8 bits of the result are kept, and stored in Vx.
-
+	fn op_8xy4(&mut self, x: u8, y: u8) -> ProgramCounter {
+		vx = self.v[x] as u16;
+		vy = self.v[y] as u16;
+		res = vx + vy;
+		carry = res > 255;
+		res = res & 0x0011; //keep only last 2 bytes
+		self.v[x] = res as u8;
+		self.v[0xF] = carry;
+		ProgramCounter::Next
+	}
 
 	// 8xy5 - SUB Vx, Vy -> Set Vx = Vx - Vy, set VF = NOT borrow.
 	// If Vx > Vy, then VF is set to 1, otherwise 0. Then Vy is subtracted from Vx, and the results stored in Vx.
-
+	fn op_8xy5(&mut self, x: u8, y: u8) -> ProgramCounter {
+		self.v[0xF] = if self.v[x] > self.v[y] {1} else {0};
+		self.v[x] = self.v[x].wrapping_sub(self.v[y]);
+		ProgramCounter::Next
+	}
 
 	// 8xy6 - SHR Vx {, Vy} -> Set Vx = Vx SHR 1.
 	// If the least-significant bit of Vx is 1, then VF is set to 1, otherwise 0. Then Vx is divided by 2.
