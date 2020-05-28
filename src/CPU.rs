@@ -391,18 +391,30 @@ impl CPU {
 	// Dxyn - DRW Vx, Vy, nibble
 	// Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision.
     fn dxyn(&mut self, x: u8, y: u8, height: u8) -> ProgramCounter {
+        let x_coord = self.v[x];
+        let y_coord = self.v[y];
+
         let mut y_offset = 0;
 
         while y_offset < height {
             let ram_byte = self.ram[I + y_offset];
             let mut x_offset = 0;
 
-            while x_offset < 8 { // checking every bit in a byte
-                if ram_byte & (0x80 >> x_offset) != 0 {
-                    if vram[x + x_offset][y + y_offset] == 1 {
+            while x_offset < 8 {
+                // Wrap around the other side
+                let pixel_x = x_coord + x_offset < CHIP8_WIDTH 
+                                    ? x_coord + x_offset
+                                    : x_coord + x_offset - CHIP8_WIDTH;
+
+                let pixel_y = y_coord + y_offset < CHIP8_HEIGHT
+                                    ? y_coord + y_offet
+                                    : y_coord + y_offset - CHIP8_HEIGHT;
+
+                if ram_byte & (0x80 >> x_offset) != 0 { // Checking every bit in ram_byte
+                    if self.vram[pixel_x][pixel_y] == 1 {
                         v[0xF] = 1; // 1 XOR 1 = 0
                     }
-                    vram[x + x_offset][y + y_offset] ^= 1;
+                    self.vram[pixel_x][pixel_y] ^= 1;
                 }
                 x_offset++;
             }
