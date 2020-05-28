@@ -187,7 +187,16 @@ impl CPU {
 	}
 
 	//OPCODES HERE
-
+	// OOEO: CLS -> Clear display
+	fn op_00e0(&mut self) -> ProgramCounter {
+		for a in 0..CHIP8_HEIGHT {
+			for b in 0..CHIP8_WIDTH {
+				self.vram[a][b] = 0;
+			}
+		}
+		self.vram_changed = true;
+		ProgramCounter::Next
+	}
 
 
 
