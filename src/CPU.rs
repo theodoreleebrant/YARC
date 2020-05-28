@@ -467,6 +467,30 @@ impl CPU {
         self.pc += OPCODE_SIZE;
     }
 
+    // Fx55 - LD [I], Vx
+    // Store registers V0 through Vx in memory starting at location I.
+    fn op_fx55(&mut self, x: u8) {
+        let reg_index = 0;
+
+        while reg_index <= x {
+            self.ram[I + reg_index] = self.v[reg_index];
+        }
+
+        self.pc += OPCODE_SIZE;
+    }
+
+
+    // Fx65 - LD Vx, [I]
+    // Read registers V0 through Vx from memory starting at location I.
+    fn op_fx65(&mut self, x: u8) {
+        let reg_index = 0;
+
+        while reg_index <= x {
+            self.v[reg_index] = self.ram[I + reg_index];
+        }
+
+        self.pc += OPCODE_SIZE;
+    } 
 
 }
 
@@ -480,16 +504,6 @@ impl CPU {
 
 
 
-// Fx55 - LD [I], Vx
-// Store registers V0 through Vx in memory starting at location I.
-
-// The interpreter copies the values of registers V0 through Vx into memory, starting at the address in I.
-
-
-// Fx65 - LD Vx, [I]
-// Read registers V0 through Vx from memory starting at location I.
-
-// The interpreter reads values from memory starting at location I into registers V0 through Vx.
 
 
 // 3.2 - Super Chip-48 Instructions           [TOC]
