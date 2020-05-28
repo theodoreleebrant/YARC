@@ -275,18 +275,22 @@ impl CPU {
 
 	// 8xy1 - OR Vx, Vy -> Set Vx = Vx OR Vy.
 	// Performs a bitwise OR on the values of Vx and Vy, then stores the result in Vx. 
-	fn op_8xy1(&mut self, x:u8, u:u8) -> ProgramCounter {
+	fn op_8xy1(&mut self, x: u8, y: u8) -> ProgramCounter {
 		// TODO: Might have error due to borrowing
 		self.v[x] = self.v[x] | self.v[y];
 		ProgramCounter::Next
 	}
 
 	// 8xy2 - AND Vx, Vy -> Set Vx = Vx AND Vy.
-	// Performs a bitwise AND on the values of Vx and Vy, then stores the result in Vx. A bitwise AND compares the corrseponding bits from two values, and if both bits are 1, then the same bit in the result is also 1. Otherwise, it is 0.
-
+	// Performs a bitwise AND on the values of Vx and Vy, then stores the result in Vx. 
+	fn op_8xy2(&mut self, x: u8, y: u8) -> ProgramCounter {
+		// TODO: Might have error due to borrowing
+		self.v[x] = self.v[x] & self.v[y];
+		ProgramCounter::Next
+	}
 
 	// 8xy3 - XOR Vx, Vy -> Set Vx = Vx XOR Vy.
-	// Performs a bitwise exclusive OR on the values of Vx and Vy, then stores the result in Vx. An exclusive OR compares the corrseponding bits from two values, and if the bits are not both the same, then the corresponding bit in the result is set to 1. Otherwise, it is 0.
+	// Performs a bitwise exclusive OR on the values of Vx and Vy, then stores the result in Vx. 
 
 
 	// 8xy4 - ADD Vx, Vy -> Set Vx = Vx + Vy, set VF = carry.
