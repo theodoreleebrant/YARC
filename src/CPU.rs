@@ -32,6 +32,7 @@ pub struct OutputState<'a> {
 
 enum ProgramCounter {
 	// what to do with pointer
+    Stay,
 	Next,
 	Skip,
 	Jump(u32),
@@ -185,7 +186,8 @@ impl CPU {
 			// Opcode size: 2. Might want to change to 
 			ProgramCounter::Next => self.pc += 2,
 			ProgramCounter::Skip => self.pc += 4,
-			ProgramCounter::Jump(addr) => self.pc = addr, 
+			ProgramCounter::Jump(addr) => self.pc = addr,
+            ProgramCounter::Stay => self.pc += 0,
 		}
 	}
 
@@ -368,7 +370,6 @@ impl CPU {
 	}
 
 
-<<<<<<< HEAD
 	// Cxkk - RND Vx, byte
 	// Set Vx = random byte AND kk.
     fn op_cxkk(&mut self, x: u8, kk: u8) -> ProgramCounter {
@@ -378,7 +379,6 @@ impl CPU {
 	}
 	// The interpreter generates a random number from 0 to 255, which is then ANDed with the value kk. The results are stored in Vx. See instruction 8xy2 for more information on AND.
 
-=======
 	// Cxkk - RND Vx, byte -> Set Vx = random byte AND kk.
 	// The interpreter generates a random number from 0 to 255, 
 	// which is then ANDed with the value kk. The results are stored in Vx.
@@ -387,11 +387,10 @@ impl CPU {
 		self.v[x] = rng.gen::<u8>() && kk;
 		ProgramCounter::Next
 	}
->>>>>>> 16634eb99931946920b65fa09197e2a8a2c3519d
 
 	// Dxyn - DRW Vx, Vy, nibble
 	// Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision.
-    fn dxyn(&mut self, x: u8, y: u8, height: u8) {
+    fn dxyn(&mut self, x: u8, y: u8, height: u8) -> ProgramCounter {
         let mut y_offset = 0;
 
         while y_offset < height {
@@ -410,39 +409,39 @@ impl CPU {
             y_offset++;
         }
 
-        self.pc += OPCODE_SIZE;
+        ProgramCounter::Next
     }
 	// The interpreter reads n bytes from memory, starting at the address stored in I. These bytes are then displayed as sprites on screen at coordinates (Vx, Vy). Sprites are XORed onto the existing screen. If this causes any pixels to be erased, VF is set to 1, otherwise it is set to 0. If the sprite is positioned so part of it is outside the coordinates of the display, it wraps around to the opposite side of the screen. See instruction 8xy3 for more information on XOR, and section 2.4, Display, for more information on the Chip-8 screen and sprites.
 
 
 	// Ex9E - SKP Vx
 	// Skip next instruction if key with the value of Vx is pressed.
-    fn op_ex9e(&mut self, x: u8) {
+    fn op_ex9e(&mut self, x: u8) -> ProgramCounter { 
         if self.keypad[self.v[x]] {
             self.pc += OPCODE_SIZE;
         }
-        self.pc += OPCODE_SIZE;
+        ProgramCounter::Next
     }
 
 	// ExA1 - SKNP Vx
 	// Skip next instruction if key with the value of Vx is not pressed.
-    fn op_exa1(&mut self, x: u8) {
+    fn op_exa1(&mut self, x: u8) -> ProgramCounter {
         if !self.keypad[self.v[x]] {
             self.pc += OPCODE_SIZE;
         }
-        self.pc += OPCODE_SIZE;
+        ProgramCounter::Next
     }
 
     // Fx07 - LD Vx, DT
     // Set Vx = delay timer value.
-    fn op_fx07(&mut self, x: u8) {
+    fn op_fx07(&mut self, x: u8) -> ProgramCounter {
         self.v[x] = self.delay_timer;
-        self.pc += OPCODE_SIZE;
+        ProgramCounter::Next
     }
 
     // Fx0A - LD Vx, K
     // Wait for a key press, store the value of the key in Vx.
-    fn op_fx0a(&mut self, x: u8) {
+    fn op_fx0a(&mut self, x: u8) -> ProgramCounter {
         let curr_key = 0;
         let arr_len = self.keypad.len();
         let mut pressed = false;
@@ -456,72 +455,74 @@ impl CPU {
         }
 
         if pressed {
-            self.pc += OPCODE_SIZE; // only increment if a key is pressed.
+            ProgramCounter::Next // only increment if a key is pressed.
+        } else {
+            ProgramCounter::Stay // if not, stay at the same program counter
         }
     }
 
     // Fx15 - LD DT, Vx
     // Set delay timer = Vx.
-    fn op_fx15(&mut self, x: u8) {
+    fn op_fx15(&mut self, x: u8) -> ProgramCounter {
         self.delay_timer = self.v[x];
-        self.pc += OPCODE_SIZE;
+        ProgramCounter::Next
     }
 
     // Fx18 - LD ST, Vx
     // Set sound timer = Vx.
-    fn op_fx18(&mut self, x: u8) {
+    fn op_fx18(&mut self, x: u8) -> ProgramCounter {
         self.sound_timer = self.v[x];
-        self.pc += OPCODE_SIZE;
+        ProgramCounter::Next
 
     // Fx1E - ADD I, Vx
     // Set I = I + Vx.
-    fn op_fx1e(&mut self, x: u8) {
+    fn op_fx1e(&mut self, x: u8) -> ProgramCounter {
         self.i += self.v[x];
-        self.pc += OPCODE_SIZE;
+        ProgramCounter::Next
     }
 
     // Fx29 - LD F, Vx
     // Set I = location of sprite for digit Vx.
-    fn op_fx29(&mut self, x: u8) {
+    fn op_fx29(&mut self, x: u8) -> ProgramCounter {
         self.i = self.v[x] * 5; // position of any digit Vx lies at fontset[Vx * 5]
-        self.pc += OPCODE_SIZE;
+        ProgramCounter::Next
     }
 
     // Fx33 - LD B, Vx
     // Store BCD representation of Vx in memory locations I, I+1, and I+2.
-    fn op_fx33(&mut self, x: u8) {
+    fn op_fx33(&mut self, x: u8) -> ProgramCounter {
         let vx = self.v[x];
 
         self.ram[i] = vx / (100 as u8); // hundreds digit
         self.ram[i + 1] = (vx / (10 as u8)) % (10 as u8); // tens digit
         self.ram[i + 2] = vx % (10 as u8); // ones digit
 
-        self.pc += OPCODE_SIZE;
+        ProgramCounter::Next
     }
 
     // Fx55 - LD [I], Vx
     // Store registers V0 through Vx in memory starting at location I.
-    fn op_fx55(&mut self, x: u8) {
+    fn op_fx55(&mut self, x: u8) -> ProgramCounter {
         let reg_index = 0;
 
         while reg_index <= x {
             self.ram[I + reg_index] = self.v[reg_index];
         }
 
-        self.pc += OPCODE_SIZE;
+        ProgramCounter::Next
     }
 
 
     // Fx65 - LD Vx, [I]
     // Read registers V0 through Vx from memory starting at location I.
-    fn op_fx65(&mut self, x: u8) {
+    fn op_fx65(&mut self, x: u8) -> ProgramCounter {
         let reg_index = 0;
 
         while reg_index <= x {
             self.v[reg_index] = self.ram[I + reg_index];
         }
 
-        self.pc += OPCODE_SIZE;
+        ProgramCounter::Next
     } 
 
 }
