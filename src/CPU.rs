@@ -364,13 +364,33 @@ impl CPU {
 
 	// Cxkk - RND Vx, byte
 	// Set Vx = random byte AND kk.
-
+    
 	// The interpreter generates a random number from 0 to 255, which is then ANDed with the value kk. The results are stored in Vx. See instruction 8xy2 for more information on AND.
 
 
 	// Dxyn - DRW Vx, Vy, nibble
 	// Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision.
+    fn dxyn(&mut self, x: u8, y: u8, height: u8) {
+        let mut y_offset = 0;
 
+        while y_offset < height {
+            let ram_byte = self.ram[I + y_offset];
+            let mut x_offset = 0;
+
+            while x_offset < 8 { // checking every bit in a byte
+                if ram_byte & (0x80 >> x_offset) != 0 {
+                    if vram[x + x_offset][y + y_offset] == 1 {
+                        v[0xF] = 1; // 1 XOR 1 = 0
+                    }
+                    vram[x + x_offset][y + y_offset] ^= 1;
+                }
+                x_offset++;
+            }
+            y_offset++;
+        }
+
+        self.pc += OPCODE_SIZE;
+    }
 	// The interpreter reads n bytes from memory, starting at the address stored in I. These bytes are then displayed as sprites on screen at coordinates (Vx, Vy). Sprites are XORed onto the existing screen. If this causes any pixels to be erased, VF is set to 1, otherwise it is set to 0. If the sprite is positioned so part of it is outside the coordinates of the display, it wraps around to the opposite side of the screen. See instruction 8xy3 for more information on XOR, and section 2.4, Display, for more information on the Chip-8 screen and sprites.
 
 
@@ -484,18 +504,6 @@ impl CPU {
     } 
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 // 3.2 - Super Chip-48 Instructions           [TOC]
 
