@@ -249,7 +249,12 @@ impl CPU {
 		}
 	}
 
-	
+	// 6xkk - LD Vx, byte -> Set Vx = kk.
+	// The interpreter puts the value kk into register Vx.
+	fn op_6xkk(&mut self, x: u8, kk: u8) -> ProgramCounter {
+		self.v[x] = kk;
+		ProgramCounter::Next
+	}
 }
 
 
