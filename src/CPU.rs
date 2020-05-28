@@ -374,16 +374,17 @@ impl CPU {
             self.pc += 2; // only increment if a key is pressed.
         }
     }
-    // All execution stops until a key is pressed, then the value of that key is stored in Vx.
 
+    // Fx15 - LD DT, Vx
+    // Set delay timer = Vx.
+    fn op_fx15(&mut self, x: u8) {
+        self.delay_timer = self.v[x];
+        self.pc += 2;
+    }
 }
 
 
 
-// Fx15 - LD DT, Vx
-// Set delay timer = Vx.
-
-// DT is set equal to the value of Vx.
 
 
 // Fx18 - LD ST, Vx
