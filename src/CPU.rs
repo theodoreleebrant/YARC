@@ -342,7 +342,13 @@ impl CPU {
 
 	// 9xy0 - SNE Vx, Vy -> Skip next instruction if Vx != Vy.
 	// The values of Vx and Vy are compared, and if they are not equal, the program counter is increased by 2.
-
+	fn op_9xy0(&mut self, x: u8, y: u8) -> ProgramCounter {
+		if self.v[x] != self.v[y] {
+			ProgramCounter::Skip
+		} else {
+			ProgramCounter::Next
+		}
+	}
 
 	// Annn - LD I, addr
 	// Set I = nnn.
