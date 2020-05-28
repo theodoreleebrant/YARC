@@ -24,7 +24,7 @@ impl AudioDriver {
 			freq: Some(42000),
 			channels: Some(1), // mono audio
 			samples: None, //default sample size
-		}
+		};
 
 		let device = audio_subsystem
 			.open_playback(None, &desired_spec, |spec|{
