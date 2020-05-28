@@ -268,7 +268,10 @@ impl CPU {
 
 	// 8xy0 - LD Vx, Vy -> Set Vx = Vy.
 	// Stores the value of register Vy in register Vx.
-
+	fn op_8xy0(&mut self, x: u8, y: u8) -> programCounter {
+		self.v[x] = self.v[y];
+		ProgramCounter::Next
+	}
 
 	// 8xy1 - OR Vx, Vy -> Set Vx = Vx OR Vy.
 	// Performs a bitwise OR on the values of Vx and Vy, then stores the result in Vx. A bitwise OR compares the corrseponding bits from two values, and if either bit is 1, then the same bit in the result is also 1. Otherwise, it is 0.
