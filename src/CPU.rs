@@ -200,9 +200,15 @@ impl CPU {
 
 	// 00EE RET -> Return from subroutine
 	// The interpreter sets the program counter to the address at the top of the stack, then subtracts 1 from the stack pointer.
-	fn 00ee(&mut self) -> ProgramCounter {
+	fn op_00ee(&mut self) -> ProgramCounter {
 		self.sp -= 1;
 		ProgramCounter::Jump(self.stack[self.sp])
+	}
+
+	// 1nnn - JP addr -> Jump to location nnn
+	// The interpreter sets the program counter to nnn.
+	fn op_1nnn(&mut self, nnn : u16) -> ProgramCounter {
+		ProgramCounter:;Jump(nnn)
 	}
 
 
