@@ -439,6 +439,25 @@ impl CPU {
         self.pc += OPCODE_SIZE;
     }
 
+    // Fx29 - LD F, Vx
+    // Set I = location of sprite for digit Vx.
+    fn op_fx29(&mut self, x: u8) {
+        self.i = self.v[x] * 5; // position of any digit Vx lies at fontset[Vx * 5]
+        self.pc += OPCODE_SIZE;
+    }
+
+    // Fx33 - LD B, Vx
+    // Store BCD representation of Vx in memory locations I, I+1, and I+2.
+    fn op_fx33(&mut self, x: u8) {
+        let vx = self.v[x];
+
+        self.ram[i] = vx / (100 as u8); // hundreds digit
+        self.ram[i + 1] = (vx / (10 as u8)) % (10 as u8); // tens digit
+        self.ram[i + 2] = vx % (10 as u8); // ones digit
+
+        self.pc += OPCODE_SIZE;
+    }
+
 
 }
 
@@ -448,16 +467,8 @@ impl CPU {
 
 
 
-// Fx29 - LD F, Vx
-// Set I = location of sprite for digit Vx.
-
-// The value of I is set to the location for the hexadecimal sprite corresponding to the value of Vx. See section 2.4, Display, for more information on the Chip-8 hexadecimal font.
 
 
-// Fx33 - LD B, Vx
-// Store BCD representation of Vx in memory locations I, I+1, and I+2.
-
-// The interpreter takes the decimal value of Vx, and places the hundreds digit in memory at location in I, the tens digit at location I+1, and the ones digit at location I+2.
 
 
 // Fx55 - LD [I], Vx
