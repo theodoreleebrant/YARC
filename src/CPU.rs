@@ -258,6 +258,57 @@ impl CPU {
 		ProgramCounter::Next
 	}
 
+<<<<<<< HEAD
+=======
+	// 7xkk - ADD Vx, byte -> Set Vx = Vx + kk.
+	// Adds the value kk to the value of register Vx, then stores the result in Vx.
+	fn op_7xkk(&mut self, x: u8, kk: u8) -> ProgramCounter {
+		// TODO: Might have type mismatch
+		self.v[x] += kk;
+		ProgramCounter::Next
+	}
+
+	// 8xy0 - LD Vx, Vy -> Set Vx = Vy.
+	// Stores the value of register Vy in register Vx.
+
+
+	// 8xy1 - OR Vx, Vy -> Set Vx = Vx OR Vy.
+	// Performs a bitwise OR on the values of Vx and Vy, then stores the result in Vx. A bitwise OR compares the corrseponding bits from two values, and if either bit is 1, then the same bit in the result is also 1. Otherwise, it is 0.
+
+
+	// 8xy2 - AND Vx, Vy -> Set Vx = Vx AND Vy.
+	// Performs a bitwise AND on the values of Vx and Vy, then stores the result in Vx. A bitwise AND compares the corrseponding bits from two values, and if both bits are 1, then the same bit in the result is also 1. Otherwise, it is 0.
+
+
+	// 8xy3 - XOR Vx, Vy -> Set Vx = Vx XOR Vy.
+	// Performs a bitwise exclusive OR on the values of Vx and Vy, then stores the result in Vx. An exclusive OR compares the corrseponding bits from two values, and if the bits are not both the same, then the corresponding bit in the result is set to 1. Otherwise, it is 0.
+
+
+	// 8xy4 - ADD Vx, Vy -> Set Vx = Vx + Vy, set VF = carry.
+	// The values of Vx and Vy are added together. If the result is greater than 8 bits (i.e., > 255,) VF is set to 1, otherwise 0. Only the lowest 8 bits of the result are kept, and stored in Vx.
+
+
+	// 8xy5 - SUB Vx, Vy -> Set Vx = Vx - Vy, set VF = NOT borrow.
+	// If Vx > Vy, then VF is set to 1, otherwise 0. Then Vy is subtracted from Vx, and the results stored in Vx.
+
+
+	// 8xy6 - SHR Vx {, Vy} -> Set Vx = Vx SHR 1.
+	// If the least-significant bit of Vx is 1, then VF is set to 1, otherwise 0. Then Vx is divided by 2.
+
+
+	// 8xy7 - SUBN Vx, Vy -> Set Vx = Vy - Vx, set VF = NOT borrow.
+	// If Vy > Vx, then VF is set to 1, otherwise 0. Then Vx is subtracted from Vy, and the results stored in Vx.
+
+
+	// 8xyE - SHL Vx {, Vy} -> Set Vx = Vx SHL 1.
+	// If the most-significant bit of Vx is 1, then VF is set to 1, otherwise to 0. Then Vx is multiplied by 2.
+
+
+	// 9xy0 - SNE Vx, Vy -> Skip next instruction if Vx != Vy.
+	// The values of Vx and Vy are compared, and if they are not equal, the program counter is increased by 2.
+
+}
+>>>>>>> 6db16a7420760b0bba7d2a00e1d0afeecf1ebb05
 
 
 
@@ -319,69 +370,6 @@ impl CPU {
 // The interpreter puts the value kk into register Vx.
 
 
-// 7xkk - ADD Vx, byte
-// Set Vx = Vx + kk.
-
-// Adds the value kk to the value of register Vx, then stores the result in Vx.
-
-// 8xy0 - LD Vx, Vy
-// Set Vx = Vy.
-
-// Stores the value of register Vy in register Vx.
-
-
-// 8xy1 - OR Vx, Vy
-// Set Vx = Vx OR Vy.
-
-// Performs a bitwise OR on the values of Vx and Vy, then stores the result in Vx. A bitwise OR compares the corrseponding bits from two values, and if either bit is 1, then the same bit in the result is also 1. Otherwise, it is 0.
-
-
-// 8xy2 - AND Vx, Vy
-// Set Vx = Vx AND Vy.
-
-// Performs a bitwise AND on the values of Vx and Vy, then stores the result in Vx. A bitwise AND compares the corrseponding bits from two values, and if both bits are 1, then the same bit in the result is also 1. Otherwise, it is 0.
-
-
-// 8xy3 - XOR Vx, Vy
-// Set Vx = Vx XOR Vy.
-
-// Performs a bitwise exclusive OR on the values of Vx and Vy, then stores the result in Vx. An exclusive OR compares the corrseponding bits from two values, and if the bits are not both the same, then the corresponding bit in the result is set to 1. Otherwise, it is 0.
-
-
-// 8xy4 - ADD Vx, Vy
-// Set Vx = Vx + Vy, set VF = carry.
-
-// The values of Vx and Vy are added together. If the result is greater than 8 bits (i.e., > 255,) VF is set to 1, otherwise 0. Only the lowest 8 bits of the result are kept, and stored in Vx.
-
-
-// 8xy5 - SUB Vx, Vy
-// Set Vx = Vx - Vy, set VF = NOT borrow.
-
-// If Vx > Vy, then VF is set to 1, otherwise 0. Then Vy is subtracted from Vx, and the results stored in Vx.
-
-
-// 8xy6 - SHR Vx {, Vy}
-// Set Vx = Vx SHR 1.
-
-// If the least-significant bit of Vx is 1, then VF is set to 1, otherwise 0. Then Vx is divided by 2.
-
-
-// 8xy7 - SUBN Vx, Vy
-// Set Vx = Vy - Vx, set VF = NOT borrow.
-
-// If Vy > Vx, then VF is set to 1, otherwise 0. Then Vx is subtracted from Vy, and the results stored in Vx.
-
-
-// 8xyE - SHL Vx {, Vy}
-// Set Vx = Vx SHL 1.
-
-// If the most-significant bit of Vx is 1, then VF is set to 1, otherwise to 0. Then Vx is multiplied by 2.
-
-
-// 9xy0 - SNE Vx, Vy
-// Skip next instruction if Vx != Vy.
-
-// The values of Vx and Vy are compared, and if they are not equal, the program counter is increased by 2.
 
 
 // Annn - LD I, addr
