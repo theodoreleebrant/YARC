@@ -186,6 +186,8 @@ impl CPU {
 		}
 	}
 
+    const OPCODE_SIZE = 2;
+
 	// OPCODES HERE
 	// OOEO: CLS -> Clear display
 	fn op_00e0(&mut self) -> ProgramCounter {
@@ -375,6 +377,12 @@ impl CPU {
 
 // Ex9E - SKP Vx
 // Skip next instruction if key with the value of Vx is pressed.
+    fn op_ex9e(&mut self, x: u8) {
+        if keypad[v[x]] {
+            self.pc += OPCODE_SIZE;
+        }
+        self.pc += OPCODE_SIZE;
+    }
 
 // Checks the keyboard, and if the key corresponding to the value of Vx is currently in the down position, PC is increased by 2.
 
