@@ -303,14 +303,18 @@ impl CPU {
 		res = vx + vy;
 		carry = res > 255;
 		res = res & 0x0011; //keep only last 2 bytes
-		v[x] = res as u8;
-		v[0xF] = carry;
+		self.v[x] = res as u8;
+		self.v[0xF] = carry;
 		ProgramCounter::Next
 	}
 
 	// 8xy5 - SUB Vx, Vy -> Set Vx = Vx - Vy, set VF = NOT borrow.
 	// If Vx > Vy, then VF is set to 1, otherwise 0. Then Vy is subtracted from Vx, and the results stored in Vx.
-	
+	fn op_8xy5(&mut self, x: u8, y: u8) -> ProgramCounter {
+		self.v[0xF] = if self.v[x] > self.v[y] {1} else {0};
+		self.v[x] = self.v[x].wrapping_sub(self.v[y]);
+		ProgramCounter::Next
+	}
 
 	// 8xy6 - SHR Vx {, Vy} -> Set Vx = Vx SHR 1.
 	// If the least-significant bit of Vx is 1, then VF is set to 1, otherwise 0. Then Vx is divided by 2.
