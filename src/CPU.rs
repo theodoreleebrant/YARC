@@ -348,7 +348,7 @@ impl CPU {
 	// Ex9E - SKP Vx
 	// Skip next instruction if key with the value of Vx is pressed.
     fn op_ex9e(&mut self, x: u8) {
-        if keypad[v[x]] {
+        if self.keypad[self.v[x]] {
             self.pc += OPCODE_SIZE;
         }
         self.pc += OPCODE_SIZE;
@@ -357,7 +357,7 @@ impl CPU {
 	// ExA1 - SKNP Vx
 	// Skip next instruction if key with the value of Vx is not pressed.
     fn op_exa1(&mut self, x: u8) {
-        if !keypad[v[x]] {
+        if !self.keypad[self.v[x]] {
             self.pc += OPCODE_SIZE;
         }
         self.pc += OPCODE_SIZE;
@@ -366,23 +366,40 @@ impl CPU {
     // Fx07 - LD Vx, DT
     // Set Vx = delay timer value.
     fn op_fx07(&mut self, x: u8) {
-        v[x] = self.delay_timer;
+        self.v[x] = self.delay_timer;
         self.pc += OPCODE_SIZE;
     }
 
+    // Fx0A - LD Vx, K
+    // Wait for a key press, store the value of the key in Vx.
+    fn op_fx0a(&mut self, x: u8) {
+        let curr_key = 0;
+        let arr_len = self.keypad.len();
+        let mut pressed = false;
 
+        while curr_key < arr_len {
+            if self.keypad[curr_key] {
+                self.v[x] = curr_key;
+                pressed = true;
+                break;
+            }
+        }
+
+        if pressed {
+            self.pc += 2; // only increment if a key is pressed.
+        }
+    }
+
+    // Fx15 - LD DT, Vx
+    // Set delay timer = Vx.
+    fn op_fx15(&mut self, x: u8) {
+        self.delay_timer = self.v[x];
+        self.pc += 2;
+    }
 }
 
-// Fx0A - LD Vx, K
-// Wait for a key press, store the value of the key in Vx.
-
-// All execution stops until a key is pressed, then the value of that key is stored in Vx.
 
 
-// Fx15 - LD DT, Vx
-// Set delay timer = Vx.
-
-// DT is set equal to the value of Vx.
 
 
 // Fx18 - LD ST, Vx
