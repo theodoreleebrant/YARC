@@ -388,6 +388,13 @@ impl CPU {
         self.sound_timer = self.v[x];
         self.pc += OPCODE_SIZE;
 
+    // Fx1E - ADD I, Vx
+    // Set I = I + Vx.
+    fn op_fx1e(&mut self, x: u8) {
+        self.i += self.v[x];
+        self.pc += OPCODE_SIZE;
+    }
+
 
 }
 
@@ -395,11 +402,6 @@ impl CPU {
 
 
 
-
-// Fx1E - ADD I, Vx
-// Set I = I + Vx.
-
-// The values of I and Vx are added, and the results are stored in I.
 
 
 // Fx29 - LD F, Vx
