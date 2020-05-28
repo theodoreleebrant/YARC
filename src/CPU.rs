@@ -540,8 +540,11 @@ impl CPU {
 }
 
 #[cfg(test)]
-#[path = "./tests/CPU_test.rs"]
-mod CPU_test;
+#[path = "./CPU_test.rs"]
+mod tests;
+
+
+
 
 // 3.2 - Super Chip-48 Instructions           [TOC]
 
