@@ -25,10 +25,11 @@ pub struct CPU {
 }
 
 pub struct OutputState<'a> {
-	vram: &'a [[ud; CHIP8_WIDTH]; CHIP8_HEIGHT], // Check lifetimes
+	vram: &'a [[u8; CHIP8_WIDTH]; CHIP8_HEIGHT], // Check lifetimes
 	vram_changed: bool,
 	beep: bool,
 }
+
 
 enum ProgramCounter {
 	// what to do with pointer
@@ -39,7 +40,7 @@ enum ProgramCounter {
 }
 
 impl CPU {
-	fn new() -> Self {
+	pub fn new() -> Self {
 		let mut ram = [0u8; CHIP8_RAM];
 
 		// Load RAM with font_set
@@ -301,11 +302,11 @@ impl CPU {
 	// 8xy4 - ADD Vx, Vy -> Set Vx = Vx + Vy, set VF = carry.
 	// The values of Vx and Vy are added together. If the result is greater than 8 bits (i.e., > 255,) VF is set to 1, otherwise 0. Only the lowest 8 bits of the result are kept, and stored in Vx.
 	fn op_8xy4(&mut self, x: usize, y: usize) -> ProgramCounter {
-		vx = self.v[x] as u16;
-		vy = self.v[y] as u16;
-		res = vx + vy;
-		carry = res > 255;
-		res = res & 0x0011; //keep only last 2 bytes
+		let vx = self.v[x] as u16;
+		let vy = self.v[y] as u16;
+		let res = vx + vy;
+		let carry = if res > 255 { 1 } else { 0 };
+		let res = res & 0x0011; //keep only last 2 bytes
 		self.v[x] = res as u8;
 		self.v[0xF] = carry;
 	    ProgramCounter::Next
@@ -322,7 +323,7 @@ impl CPU {
 	// 8xy6 - SHR Vx {, Vy} -> Set Vx = Vx SHR 1.
 	// If the least-significant bit of Vx is 1, then VF is set to 1, otherwise 0. Then Vx is divided by 2.
 	fn op_8xy6(&mut self, x: usize) -> ProgramCounter {
-		self.v[0xF] = v[x] & 1;
+		self.v[0xF] = self.v[x] & 1;
 		self.v[x] >>= 1;
 		ProgramCounter::Next
 	}
@@ -338,7 +339,7 @@ impl CPU {
 	// 8xyE - SHL Vx {, Vy} -> Set Vx = Vx SHL 1.
 	// If the most-significant bit of Vx is 1, then VF is set to 1, otherwise to 0. Then Vx is multiplied by 2.
 	fn op_8xye(&mut self, x: usize) -> ProgramCounter {
-		self.v[0xF] = v[x] & 0b10000000 >> 7; // TODO: Change binary to Hexadecimal for uniformity
+		self.v[0xF] = self.v[x] & 0b10000000 >> 7; // TODO: Change binary to Hexadecimal for uniformity
 		self.v[x] = self.v[x] << 1;
 		ProgramCounter::Next
 	}
@@ -387,17 +388,17 @@ impl CPU {
         let mut y_offset = 0;
 
         while y_offset < height {
-            let ram_byte = self.ram[(I + y_offset) as usize];
+            let ram_byte = self.ram[(self.i + y_offset as u16) as usize];
             let mut x_offset = 0;
 
             while x_offset < 8 {
                 // Wrap around the other side
-                let pixel_x = x_coord + x_offset % CHIP8_WIDTH;
-                let pixel_y = y_coord + y_offset % CHIP8_HEIGHT;
+                let pixel_x = (x_coord + x_offset) % CHIP8_WIDTH;
+                let pixel_y = (y_coord + y_offset) % CHIP8_HEIGHT;
 
                 if ram_byte & (0x80 >> x_offset) != 0 { // Checking every bit in ram_byte
                     if self.vram[pixel_x as usize][pixel_y as usize] == 1 {
-                        v[0xF] = 1; // 1 XOR 1 = 0
+                        self.v[0xF] = 1; // 1 XOR 1 = 0
                     }
                     self.vram[pixel_x as usize][pixel_y as usize] ^= 1;
                 }
@@ -414,9 +415,9 @@ impl CPU {
 	// Ex9E - SKP Vx
 	// Skip next instruction if key with the value of Vx is pressed.
     fn op_ex9e(&mut self, x: usize) -> ProgramCounter { 
-        let key = v[x];
+        let key = self.v[x];
 
-        if self.keypad[key] {
+        if self.keypad[key as usize] {
             ProgramCounter::Skip
         } else {
             ProgramCounter::Next
@@ -426,9 +427,9 @@ impl CPU {
 	// ExA1 - SKNP Vx
 	// Skip next instruction if key with the value of Vx is not pressed.
     fn op_exa1(&mut self, x: usize) -> ProgramCounter {
-        let key = v[x];
+        let key = self.v[x];
 
-        if !self.keypad[key] {
+        if !self.keypad[key as usize] {
             ProgramCounter::Skip
         } else {  
             ProgramCounter::Next
@@ -496,9 +497,9 @@ impl CPU {
     fn op_fx33(&mut self, x: usize) -> ProgramCounter {
         let vx = self.v[x];
 
-        self.ram[i] = vx / (100 as u8); // hundreds digit
-        self.ram[i + 1] = (vx / (10 as u8)) % (10 as u8); // tens digit
-        self.ram[i + 2] = vx % (10 as u8); // ones digit
+        self.ram[self.i as usize] = vx / (100 as u8); // hundreds digit
+        self.ram[(self.i + 1) as usize] = (vx / (10 as u8)) % (10 as u8); // tens digit
+        self.ram[(self.i + 2) as usize] = vx % (10 as u8); // ones digit
 
         ProgramCounter::Next
     }
@@ -509,7 +510,7 @@ impl CPU {
         let reg_index: usize = 0;
 
         while reg_index <= x {
-            self.ram[(I + reg_index as u16) as usize] = 
+            self.ram[(self.i + reg_index as u16) as usize] = 
                                     self.v[reg_index];
         }
 
@@ -524,7 +525,7 @@ impl CPU {
         let reg_index = 0;
 
         while reg_index <= x {
-            self.v[reg_index] = self.ram[(I + reg_index as u16) as usize];
+            self.v[reg_index] = self.ram[(self.i + reg_index as u16) as usize];
         }
 
         ProgramCounter::Next

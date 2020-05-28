@@ -33,7 +33,7 @@ impl AudioDriver {
 
 				//Initialise audio callback
 				SquareWave {
-					phase_inc: 240 / spec.freq as f32,  // ???
+					phase_inc: (240 / spec.freq) as f32,  // ???
 					phase: 0.0,
 					volume: 0.2,
 				}

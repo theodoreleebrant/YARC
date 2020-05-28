@@ -28,14 +28,14 @@ fn main() {
     let mut input_driver = InputDriver::new(&sdl_context);
     let mut cpu = CPU::new();
 
-    CPU.load(&cartridge_driver.rom);
+    cpu.load(&cartridge_driver.rom);
 
     while let Ok(keypad) = input_driver.poll() {
 
-        let output = CPU.tick(keypad);
+        let output = cpu.tick(keypad);
 
         if output.vram_changed {
-            display_driver.draw(output.vram);
+            graphic_driver.draw(output.vram);
         }
 
         if output.beep {
