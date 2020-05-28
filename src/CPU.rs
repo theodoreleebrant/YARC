@@ -221,7 +221,13 @@ impl CPU {
 
 	// 3xkk: SE Vx, byte -> Skip next instruction if Vx = kk.
 	// The interpreter compares register Vx to kk, and if they are equal, increments the program counter by 2.
-
+	fn op_3xkk(&mut self, x: u8, kk: u8) -> ProgramCounter {
+		if self.v[x] == kk {
+			ProgramCounter::Skip
+		} else {
+			ProgramCounter::Next
+		}
+	}
 }
 
 
