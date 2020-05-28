@@ -347,16 +347,16 @@ impl CPU {
         }
         self.pc += OPCODE_SIZE;
     }
-// Checks the keyboard, and if the key corresponding to the value of Vx is currently in the up position, PC is increased by 2.
+
+    // Fx07 - LD Vx, DT
+    // Set Vx = delay timer value.
+    fn op_fx07(&mut self, x: u8) {
+        v[x] = self.delay_timer;
+        self.pc += OPCODE_SIZE;
+    }
+
+
 }
-
-
-
-// Fx07 - LD Vx, DT
-// Set Vx = delay timer value.
-
-// The value of DT is placed into Vx.
-
 
 // Fx0A - LD Vx, K
 // Wait for a key press, store the value of the key in Vx.
