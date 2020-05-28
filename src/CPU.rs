@@ -358,10 +358,11 @@ impl CPU {
 	}
 
 
-	// Bnnn - JP V0, addr
-	// Jump to location nnn + V0.
-
+	// Bnnn - JP V0, addr -> Jump to location nnn + V0.
 	// The program counter is set to nnn plus the value of V0.
+	fn op_bnnn(&mut self, nnn: u16) -> ProgramCounter {
+		ProgramCounter::Jump(nnn + self.v[0] as u16)
+	}
 
 
 	// Cxkk - RND Vx, byte
