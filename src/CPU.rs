@@ -371,7 +371,7 @@ impl CPU {
         }
 
         if pressed {
-            self.pc += 2; // only increment if a key is pressed.
+            self.pc += OPCODE_SIZE; // only increment if a key is pressed.
         }
     }
 
@@ -379,18 +379,21 @@ impl CPU {
     // Set delay timer = Vx.
     fn op_fx15(&mut self, x: u8) {
         self.delay_timer = self.v[x];
-        self.pc += 2;
+        self.pc += OPCODE_SIZE;
     }
+
+    // Fx18 - LD ST, Vx
+    // Set sound timer = Vx.
+    fn op_fx18(&mut self, x: u8) {
+        self.sound_timer = self.v[x];
+        self.pc += OPCODE_SIZE;
+
+
 }
 
 
 
 
-
-// Fx18 - LD ST, Vx
-// Set sound timer = Vx.
-
-// ST is set equal to the value of Vx.
 
 
 // Fx1E - ADD I, Vx
