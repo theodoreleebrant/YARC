@@ -350,10 +350,12 @@ impl CPU {
 		}
 	}
 
-	// Annn - LD I, addr
-	// Set I = nnn.
-
+	// Annn - LD I, addr -> Set I = nnn.
 	// The value of register I is set to nnn.
+	fn op_annn(&mut self, nnn: u16) -> ProgramCounter {
+		self.i = nnn;
+		ProgramCounter::Next
+	}
 
 
 	// Bnnn - JP V0, addr
