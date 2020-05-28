@@ -3,6 +3,9 @@ use CHIP8_HEIGHT;
 use CHIP8_RAM;
 use font::FONT_SET;
 
+use rand;
+use rand:;Rng;
+
 pub struct CPU {
 	opcode: u16,			// opcodes
 	v: [u8; 16],			// registers v0, v1, ..., vF; 8-bit
@@ -365,11 +368,14 @@ impl CPU {
 	}
 
 
-	// Cxkk - RND Vx, byte
-	// Set Vx = random byte AND kk.
-
-	// The interpreter generates a random number from 0 to 255, which is then ANDed with the value kk. The results are stored in Vx. See instruction 8xy2 for more information on AND.
-
+	// Cxkk - RND Vx, byte -> Set Vx = random byte AND kk.
+	// The interpreter generates a random number from 0 to 255, 
+	// which is then ANDed with the value kk. The results are stored in Vx.
+	fn op_cxkk(&mut self, x: u8, kk: u8) -> ProgramCounter {
+		let mut rng = rand::thread_rng();
+		self.v[x] = rng.gen::<u8>() && kk;
+		ProgramCounter::Next
+	}
 
 	// Dxyn - DRW Vx, Vy, nibble
 	// Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision.
