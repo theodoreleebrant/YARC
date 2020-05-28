@@ -3,6 +3,9 @@ use CHIP8_HEIGHT;
 use CHIP8_RAM;
 use font::FONT_SET;
 
+use rand;
+use rand:;Rng;
+
 pub struct CPU {
 	opcode: u16,			// opcodes
 	v: [u8; 16],			// registers v0, v1, ..., vF; 8-bit
@@ -350,23 +353,41 @@ impl CPU {
 		}
 	}
 
-	// Annn - LD I, addr
-	// Set I = nnn.
-
+	// Annn - LD I, addr -> Set I = nnn.
 	// The value of register I is set to nnn.
+	fn op_annn(&mut self, nnn: u16) -> ProgramCounter {
+		self.i = nnn;
+		ProgramCounter::Next
+	}
 
 
-	// Bnnn - JP V0, addr
-	// Jump to location nnn + V0.
-
+	// Bnnn - JP V0, addr -> Jump to location nnn + V0.
 	// The program counter is set to nnn plus the value of V0.
+	fn op_bnnn(&mut self, nnn: u16) -> ProgramCounter {
+		ProgramCounter::Jump(nnn + self.v[0] as u16)
+	}
 
 
+<<<<<<< HEAD
 	// Cxkk - RND Vx, byte
 	// Set Vx = random byte AND kk.
-    
+    fn op_cxkk(&mut self, x: u8, kk: u8) -> ProgramCounter {
+		let mut rng = rand::thread_rng();
+		self.v[x] = rng.gen::<u8>() && kk;
+		ProgramCounter::Next
+	}
 	// The interpreter generates a random number from 0 to 255, which is then ANDed with the value kk. The results are stored in Vx. See instruction 8xy2 for more information on AND.
 
+=======
+	// Cxkk - RND Vx, byte -> Set Vx = random byte AND kk.
+	// The interpreter generates a random number from 0 to 255, 
+	// which is then ANDed with the value kk. The results are stored in Vx.
+	fn op_cxkk(&mut self, x: u8, kk: u8) -> ProgramCounter {
+		let mut rng = rand::thread_rng();
+		self.v[x] = rng.gen::<u8>() && kk;
+		ProgramCounter::Next
+	}
+>>>>>>> 16634eb99931946920b65fa09197e2a8a2c3519d
 
 	// Dxyn - DRW Vx, Vy, nibble
 	// Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision.
