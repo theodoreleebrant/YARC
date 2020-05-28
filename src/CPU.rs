@@ -395,6 +395,13 @@ impl CPU {
         self.pc += OPCODE_SIZE;
     }
 
+    // Fx29 - LD F, Vx
+    // Set I = location of sprite for digit Vx.
+    fn fx29(&mut self, x: u8) {
+        self.i = self.v[x] * 5; // position of any digit Vx lies at fontset[Vx * 5]
+    }
+
+
 
 }
 
@@ -404,10 +411,6 @@ impl CPU {
 
 
 
-// Fx29 - LD F, Vx
-// Set I = location of sprite for digit Vx.
-
-// The value of I is set to the location for the hexadecimal sprite corresponding to the value of Vx. See section 2.4, Display, for more information on the Chip-8 hexadecimal font.
 
 
 // Fx33 - LD B, Vx
