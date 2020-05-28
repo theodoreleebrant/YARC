@@ -186,7 +186,7 @@ impl CPU {
 		}
 	}
 
-	//OPCODES HERE
+	// OPCODES HERE
 	// OOEO: CLS -> Clear display
 	fn op_00e0(&mut self) -> ProgramCounter {
 		for a in 0..CHIP8_HEIGHT {
@@ -196,6 +196,13 @@ impl CPU {
 		}
 		self.vram_changed = true;
 		ProgramCounter::Next
+	}
+
+	// 00EE RET -> Return from subroutine
+	// The interpreter sets the program counter to the address at the top of the stack, then subtracts 1 from the stack pointer.
+	fn 00ee(&mut self) -> ProgramCounter {
+		self.sp -= 1;
+		ProgramCounter::Jump(self.stack[self.sp])
 	}
 
 
