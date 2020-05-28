@@ -4,7 +4,7 @@ use CHIP8_RAM;
 use font::FONT_SET;
 
 use rand;
-use rand:;Rng;
+use rand::Rng;
 
 pub struct CPU {
 	opcode: u16,			// opcodes
@@ -191,8 +191,6 @@ impl CPU {
 		}
 	}
 
-    const OPCODE_SIZE = 2;
-
 	// OPCODES HERE
 	// OOEO: CLS -> Clear display
 	fn op_00e0(&mut self) -> ProgramCounter {
@@ -310,7 +308,7 @@ impl CPU {
 		res = res & 0x0011; //keep only last 2 bytes
 		self.v[x] = res as u8;
 		self.v[0xF] = carry;
-		ProgramCounter::Next
+	    ProgramCounter::Next
 	}
 
 	// 8xy5 - SUB Vx, Vy -> Set Vx = Vx - Vy, set VF = NOT borrow.
@@ -372,14 +370,6 @@ impl CPU {
 
 	// Cxkk - RND Vx, byte
 	// Set Vx = random byte AND kk.
-    fn op_cxkk(&mut self, x: u8, kk: u8) -> ProgramCounter {
-		let mut rng = rand::thread_rng();
-		self.v[x] = rng.gen::<u8>() && kk;
-		ProgramCounter::Next
-	}
-	// The interpreter generates a random number from 0 to 255, which is then ANDed with the value kk. The results are stored in Vx. See instruction 8xy2 for more information on AND.
-
-	// Cxkk - RND Vx, byte -> Set Vx = random byte AND kk.
 	// The interpreter generates a random number from 0 to 255, 
 	// which is then ANDed with the value kk. The results are stored in Vx.
 	fn op_cxkk(&mut self, x: u8, kk: u8) -> ProgramCounter {
@@ -391,24 +381,19 @@ impl CPU {
 	// Dxyn - DRW Vx, Vy, nibble
 	// Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision.
     fn dxyn(&mut self, x: u8, y: u8, height: u8) -> ProgramCounter {
-        let x_coord = self.v[x];
-        let y_coord = self.v[y];
+        let x_coord = self.v[x as usize];
+        let y_coord = self.v[y as usize];
 
         let mut y_offset = 0;
 
         while y_offset < height {
-            let ram_byte = self.ram[I + y_offset];
+            let ram_byte = self.ram[(I + y_offset) as usize];
             let mut x_offset = 0;
 
             while x_offset < 8 {
                 // Wrap around the other side
-                let pixel_x = x_coord + x_offset < CHIP8_WIDTH 
-                                    ? x_coord + x_offset
-                                    : x_coord + x_offset - CHIP8_WIDTH;
-
-                let pixel_y = y_coord + y_offset < CHIP8_HEIGHT
-                                    ? y_coord + y_offet
-                                    : y_coord + y_offset - CHIP8_HEIGHT;
+                let pixel_x: usize = x_coord + x_offset % CHIP8_WIDTH;
+                let pixel_y: usize = y_coord + y_offset % CHIP8_HEIGHT;
 
                 if ram_byte & (0x80 >> x_offset) != 0 { // Checking every bit in ram_byte
                     if self.vram[pixel_x][pixel_y] == 1 {
@@ -416,9 +401,9 @@ impl CPU {
                     }
                     self.vram[pixel_x][pixel_y] ^= 1;
                 }
-                x_offset++;
+                x_offset += 1;
             }
-            y_offset++;
+            y_offset += 1;
         }
 
         ProgramCounter::Next
@@ -429,25 +414,27 @@ impl CPU {
 	// Ex9E - SKP Vx
 	// Skip next instruction if key with the value of Vx is pressed.
     fn op_ex9e(&mut self, x: u8) -> ProgramCounter { 
-        if self.keypad[self.v[x]] {
-            self.pc += OPCODE_SIZE;
+        if self.keypad[self.v[x as usize]] {
+            ProgramCounter::Skip
+        } else {
+            ProgramCounter::Next
         }
-        ProgramCounter::Next
     }
 
 	// ExA1 - SKNP Vx
 	// Skip next instruction if key with the value of Vx is not pressed.
     fn op_exa1(&mut self, x: u8) -> ProgramCounter {
-        if !self.keypad[self.v[x]] {
-            self.pc += OPCODE_SIZE;
+        if !self.keypad[self.v[x as usize]] {
+            ProgramCounter::Skip
+        } else {  
+            ProgramCounter::Next
         }
-        ProgramCounter::Next
     }
 
     // Fx07 - LD Vx, DT
     // Set Vx = delay timer value.
     fn op_fx07(&mut self, x: u8) -> ProgramCounter {
-        self.v[x] = self.delay_timer;
+        self.v[x as usize] = self.delay_timer;
         ProgramCounter::Next
     }
 
@@ -460,7 +447,7 @@ impl CPU {
 
         while curr_key < arr_len {
             if self.keypad[curr_key] {
-                self.v[x] = curr_key;
+                self.v[x as usize] = curr_key;
                 pressed = true;
                 break;
             }
@@ -476,34 +463,34 @@ impl CPU {
     // Fx15 - LD DT, Vx
     // Set delay timer = Vx.
     fn op_fx15(&mut self, x: u8) -> ProgramCounter {
-        self.delay_timer = self.v[x];
+        self.delay_timer = self.v[x as usize];
         ProgramCounter::Next
     }
 
     // Fx18 - LD ST, Vx
     // Set sound timer = Vx.
     fn op_fx18(&mut self, x: u8) -> ProgramCounter {
-        self.sound_timer = self.v[x];
+        self.sound_timer = self.v[x as usize];
         ProgramCounter::Next
-
+    }
     // Fx1E - ADD I, Vx
     // Set I = I + Vx.
     fn op_fx1e(&mut self, x: u8) -> ProgramCounter {
-        self.i += self.v[x];
+        self.i += self.v[x as usize];
         ProgramCounter::Next
     }
 
     // Fx29 - LD F, Vx
     // Set I = location of sprite for digit Vx.
-    fn op_fx29(&mut self, x: u8) -> ProgramCounter {
-        self.i = self.v[x] * 5; // position of any digit Vx lies at fontset[Vx * 5]
+    fn op_fx29(&mut self, x: usize) -> ProgramCounter {
+        self.i = (self.v[x as usize] * 5) as u16; // position of any digit Vx lies at fontset[Vx * 5]
         ProgramCounter::Next
     }
 
     // Fx33 - LD B, Vx
     // Store BCD representation of Vx in memory locations I, I+1, and I+2.
-    fn op_fx33(&mut self, x: u8) -> ProgramCounter {
-        let vx = self.v[x];
+    fn op_fx33(&mut self, x) -> ProgramCounter {
+        let vx = self.v[x as usize];
 
         self.ram[i] = vx / (100 as u8); // hundreds digit
         self.ram[i + 1] = (vx / (10 as u8)) % (10 as u8); // tens digit
@@ -518,11 +505,12 @@ impl CPU {
         let reg_index = 0;
 
         while reg_index <= x {
-            self.ram[I + reg_index] = self.v[reg_index];
+            self.ram[(I + reg_index) as usize] = self.v[reg_index as usize];
         }
 
         ProgramCounter::Next
     }
+    
 
 
     // Fx65 - LD Vx, [I]
@@ -531,12 +519,11 @@ impl CPU {
         let reg_index = 0;
 
         while reg_index <= x {
-            self.v[reg_index] = self.ram[I + reg_index];
+            self.v[reg_index as usize] = self.ram[(I + reg_index) as usize];
         }
 
         ProgramCounter::Next
-    } 
-
+    }
 }
 
 #[cfg(test)]

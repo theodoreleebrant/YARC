@@ -4,7 +4,7 @@ use sdl2::rect::Rect;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
 
-use CHIP8_WIDTH; later after CPU been implemented
+use CHIP8_WIDTH;
 use CHIP8_HEIGHT;
 
 
@@ -50,8 +50,8 @@ impl GraphicDriver {
 
                 self.canvas.set_draw_color(color(col));
                 let _ = self.canvas
-                        .fill_rect(Rect::new(x as i32, y as i32, SCALE_FACTOR, SCALE_FACTOR); // want to fill rectangle (pixel) at that particular address
-                }
+                        .fill_rect(Rect::new(x as i32, y as i32, SCALE_FACTOR, SCALE_FACTOR)); // want to fill rectangle (pixel) at that particular address
+            }
         }
         
         self.canvas.present(); // Bring canvas to front
