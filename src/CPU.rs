@@ -230,6 +230,33 @@ impl CPU {
 			ProgramCounter::Next
 		}
 	}
+
+	// 4xkk - SNE Vx, byte -> Skip next instruction if Vx != kk.
+	// The interpreter compares register Vx to kk, and if they are not equal, increments the program counter by 2.
+	fn op_4xkk(&mut self, x: u8, kk: u8) -> ProgramCounter {
+		if self.v[x] != kk {
+			ProgramCounter::Skip
+		} else {
+			ProgramCounter::Next
+		}
+	}
+
+	// 5xy0 - SE Vx, Vy -> Skip next instruction if Vx = Vy.
+	// The interpreter compares register Vx to register Vy, and if they are equal, increments the program counter by 2.
+	fn op_5xy0(&mut self, x: u8, y: u8) -> ProgramCounter {
+		if self.v[x] == self.v[y] {
+			ProgramCounter::Skip
+		} else {
+			ProgramCounter::Next
+		}
+	}
+
+	// 6xkk - LD Vx, byte -> Set Vx = kk.
+	// The interpreter puts the value kk into register Vx.
+	fn op_6xkk(&mut self, x: u8, kk: u8) -> ProgramCounter {
+		self.v[x] = kk;
+		ProgramCounter::Next
+	}
 }
 
 
