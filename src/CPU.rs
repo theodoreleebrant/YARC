@@ -257,7 +257,7 @@ impl CPU {
 		self.v[x] = kk;
 		ProgramCounter::Next
 	}
-}
+
 
 
 
@@ -417,13 +417,17 @@ impl CPU {
         self.pc += OPCODE_SIZE;
     }
 
-// Checks the keyboard, and if the key corresponding to the value of Vx is currently in the down position, PC is increased by 2.
-
-
 // ExA1 - SKNP Vx
 // Skip next instruction if key with the value of Vx is not pressed.
-
+    fn op_exa1(&mut self, x: u8) {
+        if !keypad[v[x]] {
+            self.pc += OPCODE_SIZE;
+        }
+        self.pc += OPCODE_SIZE;
+    }
 // Checks the keyboard, and if the key corresponding to the value of Vx is currently in the up position, PC is increased by 2.
+}
+
 
 
 // Fx07 - LD Vx, DT
