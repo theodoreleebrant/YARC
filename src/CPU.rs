@@ -36,7 +36,6 @@ enum ProgramCounter {
 	Next,
 	Skip,
 	Jump(u16), // changed jump to u16 becaue pc is only 16 bits
-    Stay
 }
 
 
@@ -57,7 +56,7 @@ impl CPU {
 	    	delay_timer: 0,
 	    	pc: 0x200,
 	    	sp: 0,
-	    	ram: [0; CHIP8_RAM], // changed this from memory to ram
+	    	ram: ram, // changed this from memory to ram
 	    	vram: [[0; CHIP8_WIDTH]; CHIP8_HEIGHT],
 			vram_changed: false,
 			stack: [0; 16],
@@ -147,7 +146,7 @@ impl CPU {
 		let y = parts.2 as usize;
 		let n = parts.3 as usize;
 		let kk = (parts.2 << 4) as u8 | parts.3;
-		let nnn = ((parts.1 as u16) << 8) | ((parts.2 as u16) << 4) | (parts.1 as u16);
+		let nnn = ((parts.1 as u16) << 8) | ((parts.2 as u16) << 4) | (parts.3 as u16);
 
 		let pc_change = match parts {
 			(0x00, 0x00, 0x0e, 0x00) => self.op_00e0(),
@@ -192,7 +191,6 @@ impl CPU {
 			ProgramCounter::Next => self.pc += 2,
 			ProgramCounter::Skip => self.pc += 4,
 			ProgramCounter::Jump(addr) => self.pc = addr,
-		    ProgramCounter::Stay => self.pc += 0,
         }
 	}
 
@@ -311,13 +309,13 @@ impl CPU {
 	// 8xy4 - ADD Vx, Vy -> Set Vx = Vx + Vy, set VF = carry.
 	// The values of Vx and Vy are added together. If the result is greater than 8 bits (i.e., > 255,) VF is set to 1, otherwise 0. Only the lowest 8 bits of the result are kept, and stored in Vx.
 	fn op_8xy4(&mut self, x: usize, y: usize) -> ProgramCounter {
-		let vx = self.v[x] as u16;
+		let vx = self.v[x] as u16; // set as u16 to accommodate overflow
 		let vy = self.v[y] as u16;
 		let res = vx + vy;
 		let carry = if res > 255 { 1 } else { 0 };
-		let res = res & 0x0011; //keep only last 2 bytes
+		//let res = res & 0x0011; //keep only last 2 bytes
 		self.v[x] = res as u8;
-		self.v[0xF] = carry;
+		self.v[0x0f] = carry;
 	    ProgramCounter::Next
 	}
 
@@ -348,7 +346,7 @@ impl CPU {
 	// 8xyE - SHL Vx {, Vy} -> Set Vx = Vx SHL 1.
 	// If the most-significant bit of Vx is 1, then VF is set to 1, otherwise to 0. Then Vx is multiplied by 2.
 	fn op_8xye(&mut self, x: usize) -> ProgramCounter {
-		self.v[0xF] = self.v[x] & 0b10000000 >> 7; // TODO: Change binary to Hexadecimal for uniformity
+		self.v[0xF] = (self.v[x] & 0x80) >> 7; // TODO: Change binary to Hexadecimal for uniformity
 		self.v[x] = self.v[x] << 1;
 		ProgramCounter::Next
 	}
@@ -446,22 +444,7 @@ impl CPU {
     fn op_fx0a(&mut self, x: usize) -> ProgramCounter {
         self.keypad_waiting = true;
         self.keypad_register = x;
-        
-        let mut pressed = false;
-
-        for key in 0..self.keypad.len() {
-            if self.keypad[key] {
-                self.v[x] = key as u8;
-                pressed = true;
-                break;
-            }
-        }
-        
-        if pressed {
-            ProgramCounter::Next
-        } else {
-            ProgramCounter::Stay
-        }
+        ProgramCounter::Next    
     }
 
     // Fx15 - LD DT, Vx

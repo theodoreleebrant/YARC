@@ -173,7 +173,7 @@ fn test_op_8xy5() {
 }
 // SHR Vx
 #[test]
-fn test_op_8x06() {
+fn test_op_8xy6() {
     // 4 >> 1 == 2
     check_math(0x04, 0, 6, 0x02, 0);
     // 5 >> 1 == 2 with carry
@@ -188,7 +188,7 @@ fn test_op_8xy7() {
 
 // SHL Vx
 #[test]
-fn test_op_8x0e() {
+fn test_op_8xye() {
     check_math(0b11000000, 0, 0x0e, 0b10000000, 1);
     check_math(0b00000111, 0, 0x0e, 0b00001110, 0);
 }
