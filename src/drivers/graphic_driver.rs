@@ -4,13 +4,13 @@ use sdl2::rect::Rect;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
 
-use CHIP8_WIDTH;
-use CHIP8_HEIGHT;
+use crate::CHIP8_WIDTH;
+use crate::CHIP8_HEIGHT;
 
 
-const SCALE_FACTOR: u8 = 20;
-const SCREEN_WIDTH: u8 = (CHIP8_WIDTH as u32) * SCALE_FACTOR;
-const SCREEN_HEIGHT: u8 = (CHIP8_HEIGHT as u32) * SCALE_FACTOR;
+const SCALE_FACTOR: u32 = 20;
+const SCREEN_WIDTH: u32 = (CHIP8_WIDTH as u32) * SCALE_FACTOR;
+const SCREEN_HEIGHT: u32 = (CHIP8_HEIGHT as u32) * SCALE_FACTOR;
 // Screen is computer screen. This is larger than a chip8 screen
 
 pub struct GraphicDriver { //  graphic driver object with a window in it
@@ -59,7 +59,7 @@ impl GraphicDriver {
     }
 }
         
-fn color(p: u8) { // There are only 2 colors: blank or non-blank
+fn color(p: u8) -> pixels::Color { // There are only 2 colors: blank or non-blank
     if p == 0 {
         pixels::Color::RGB(0,0,0)
     } else {

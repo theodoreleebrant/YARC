@@ -80,3 +80,4 @@ pub const FONT_SET: [u8; 80] = [
     0x80,
     0x80,
 ];
+

@@ -15,7 +15,7 @@ pub struct AudioDriver {
 }
 
 impl AudioDriver {
-	pub fn new(sd1_context: &sdl2::Sdl) -> Self {
+	pub fn new(sdl_context: &sdl2::Sdl) -> Self {
 		let audio_subsystem = sdl_context.audio().unwrap(); 
 		// Might want to check; can cause panic. core:;result::Result
 		// Gives an AudioSubsystem
@@ -33,7 +33,7 @@ impl AudioDriver {
 
 				//Initialise audio callback
 				SquareWave {
-					phase_inc: 240 / spec.freq as f32,  // ???
+					phase_inc: (240 / spec.freq) as f32,  // ???
 					phase: 0.0,
 					volume: 0.2,
 				}
