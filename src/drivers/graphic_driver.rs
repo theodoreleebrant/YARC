@@ -4,8 +4,8 @@ use sdl2::rect::Rect;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
 
-use CHIP8_WIDTH;
-use CHIP8_HEIGHT;
+use crate::CHIP8_WIDTH;
+use crate::CHIP8_HEIGHT;
 
 
 const SCALE_FACTOR: u32 = 20;
@@ -59,7 +59,7 @@ impl GraphicDriver {
     }
 }
         
-fn color(p: u8) -> pixel::Color { // There are only 2 colors: blank or non-blank
+fn color(p: u8) -> pixels::Color { // There are only 2 colors: blank or non-blank
     if p == 0 {
         pixels::Color::RGB(0,0,0)
     } else {

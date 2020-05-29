@@ -1,7 +1,7 @@
-use CHIP8_WIDTH;
-use CHIP8_HEIGHT;
-use CHIP8_RAM;
-use font::FONT_SET;
+use crate::CHIP8_WIDTH;
+use crate::CHIP8_HEIGHT;
+use crate::CHIP8_RAM;
+use crate::font::FONT_SET;
 
 use rand;
 use rand::Rng;
@@ -393,8 +393,8 @@ impl CPU {
 
             while x_offset < 8 {
                 // Wrap around the other side
-                let pixel_x = (x_coord + x_offset) % CHIP8_WIDTH;
-                let pixel_y = (y_coord + y_offset) % CHIP8_HEIGHT;
+                let pixel_x = (x_coord + x_offset) % (CHIP8_WIDTH as u8);
+                let pixel_y = (y_coord + y_offset) % (CHIP8_HEIGHT as u8);
 
                 if ram_byte & (0x80 >> x_offset) != 0 { // Checking every bit in ram_byte
                     if self.vram[pixel_x as usize][pixel_y as usize] == 1 {

@@ -15,7 +15,7 @@ pub struct AudioDriver {
 }
 
 impl AudioDriver {
-	pub fn new(sd1_context: &sdl2::Sdl) -> Self {
+	pub fn new(sdl_context: &sdl2::Sdl) -> Self {
 		let audio_subsystem = sdl_context.audio().unwrap(); 
 		// Might want to check; can cause panic. core:;result::Result
 		// Gives an AudioSubsystem

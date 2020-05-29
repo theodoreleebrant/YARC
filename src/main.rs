@@ -1,17 +1,17 @@
-const CHIP8_WIDTH: usize = 64;
-const CHIP8_HEIGHT: usize = 32;
-const CHIP8_RAM: usize = 4096;
-
 extern crate rand;
 extern crate sdl2;
 
-mod drivers; // import all the files we wrote
-mod CPU;
-mod font;
+pub mod drivers; // import all the files we wrote
+pub mod CPU;
+pub mod font;
 
 use std::thread; // for concurrency
 use std::time::Duration; // Duration is an enum that supports timing For timing of clock
 use std::env; // for input
+
+pub const CHIP8_WIDTH: usize = 64;
+pub const CHIP8_HEIGHT: usize = 32;
+pub const CHIP8_RAM: usize = 4096;
 
 fn main() {
     let sleep_duration = Duration::from_millis(2);
