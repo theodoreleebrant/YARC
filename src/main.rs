@@ -1,19 +1,23 @@
 extern crate rand;
 extern crate sdl2;
 
-pub mod drivers; // import all the files we wrote
-pub mod CPU;
-pub mod font;
+mod drivers; // import all the files we wrote
+mod cpu;
+mod font;
 
 use std::thread; // for concurrency
 use std::time::Duration; // Duration is an enum that supports timing For timing of clock
 use std::env; // for input
+use cpu::CPU; //  added
+use crate::drivers::*;
 
 pub const CHIP8_WIDTH: usize = 64;
 pub const CHIP8_HEIGHT: usize = 32;
 pub const CHIP8_RAM: usize = 4096;
 
 fn main() {
+    drivers::confirm_import();
+
     let sleep_duration = Duration::from_millis(2);
 
     let sdl_context = sdl2::init().unwrap();
@@ -28,7 +32,7 @@ fn main() {
     let mut input_driver = InputDriver::new(&sdl_context);
     let mut cpu = CPU::new();
 
-    cpu.load(&cartridge_driver.rom);
+    cpu.load_program(&cartridge_driver.rom);
 
     while let Ok(keypad) = input_driver.poll() {
 

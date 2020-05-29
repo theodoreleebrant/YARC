@@ -9,3 +9,7 @@ pub use self::graphic_driver::GraphicDriver;
 pub use self::audio_driver::AudioDriver;
 pub use self::input_driver::InputDriver;
 pub use self::cartridge_driver::CartridgeDriver;
+
+pub fn confirm_import() {
+    println!("Imported drivers successfully");
+}

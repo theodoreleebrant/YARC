@@ -25,9 +25,9 @@ pub struct CPU {
 }
 
 pub struct OutputState<'a> {
-	vram: &'a [[u8; CHIP8_WIDTH]; CHIP8_HEIGHT], // Check lifetimes
-	vram_changed: bool,
-	beep: bool,
+	pub vram: &'a [[u8; CHIP8_WIDTH]; CHIP8_HEIGHT], // Check lifetimes
+	pub vram_changed: bool,
+	pub beep: bool,
 }
 
 
@@ -39,8 +39,13 @@ enum ProgramCounter {
 	Jump(u16), // changed jump to u16 becaue pc is only 16 bits
 }
 
+
 impl CPU {
-	pub fn new() -> Self {
+	pub fn confirm_import() {
+        println!("Imported CPU successfully");
+    }
+
+    pub fn new() -> Self {
 		let mut ram = [0u8; CHIP8_RAM];
 
 		// Load RAM with font_set
@@ -66,7 +71,7 @@ impl CPU {
 		}
 	}
 
-	fn load_program(&mut self, program: Vec<u8>) {
+	pub fn load_program(&mut self, program: Vec<u8>) {
 		let data = vec![0; 0x200];
 		for byte in program {
 			data.push(byte);
@@ -79,7 +84,7 @@ impl CPU {
 
 	
 
-	fn tick(&mut self, keypad: [bool; 16]) -> OutputState {
+	pub fn tick(&mut self, keypad: [bool; 16]) -> OutputState {
 		// Initialisation
 		self.keypad = keypad;
 		self.vram_changed = false;
