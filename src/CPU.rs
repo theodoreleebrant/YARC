@@ -33,7 +33,6 @@ pub struct OutputState<'a> {
 
 enum ProgramCounter {
 	// what to do with pointer
-    Stay,
 	Next,
 	Skip,
 	Jump(u16), // changed jump to u16 becaue pc is only 16 bits
@@ -57,7 +56,7 @@ impl CPU {
 	    	delay_timer: 0,
 	    	pc: 0x200,
 	    	sp: 0,
-	    	ram: [0; CHIP8_RAM], // changed this from memory to ram
+	    	ram: ram, // changed this from memory to ram
 	    	vram: [[0; CHIP8_WIDTH]; CHIP8_HEIGHT],
 			vram_changed: false,
 			stack: [0; 16],
@@ -67,19 +66,19 @@ impl CPU {
 		}
 	}
 
-	pub fn load_program(&mut self, program: Vec<u8>) {
-		let mut data = vec![0; 0x200];
+	pub fn load_program(&mut self, program: &[u8]) { // Changed here
+		let mut data = Vec::new(); // changed from vec![0;0x200] to new Vec
 		for byte in program {
 			data.push(byte);
 		}
 		for (i, &byte) in data.iter().enumerate() {
 			// TODO: Implement a check: address should be less than 0x1000
-			self.ram[0x200 + i] = byte;  //programs start at 0x200
+			self.ram[0x200 + i] = *byte;  //programs start at 0x200
 		}
 	}
 
 	
-
+    // Needs the most debugging
 	pub fn tick(&mut self, keypad: [bool; 16]) -> OutputState {
 		// Initialisation
 		self.keypad = keypad;
@@ -87,6 +86,7 @@ impl CPU {
 
 		// Each tick, either (input from keypad) or (decrement timer & do opcode)
 		if self.keypad_waiting {
+            println!("Waiting for keyboard");
 			for i in 0..keypad.len() {
 				if keypad[i] {
 					self.keypad_waiting = false;				// Stop the keypad_waiting
@@ -139,12 +139,14 @@ impl CPU {
 			(opcode & 0x00F0) >> 4 as u8,
 			(opcode & 0x000F) as u8,
 		);
+        
+        //println!("{}", format!("Running opcode {:x}", opcode)); // debug
 
-		let x = parts.1 as usize;
+        let x = parts.1 as usize;
 		let y = parts.2 as usize;
-		let n = parts.3;
+		let n = parts.3 as usize;
 		let kk = (parts.2 << 4) as u8 | parts.3;
-		let nnn = ((parts.1 as u16) << 8) | ((parts.2 as u16) << 4) | (parts.1 as u16);
+		let nnn = ((parts.1 as u16) << 8) | ((parts.2 as u16) << 4) | (parts.3 as u16);
 
 		let pc_change = match parts {
 			(0x00, 0x00, 0x0e, 0x00) => self.op_00e0(),
@@ -189,8 +191,7 @@ impl CPU {
 			ProgramCounter::Next => self.pc += 2,
 			ProgramCounter::Skip => self.pc += 4,
 			ProgramCounter::Jump(addr) => self.pc = addr,
-            ProgramCounter::Stay => self.pc += 0,
-		}
+        }
 	}
 
 	// OPCODES HERE
@@ -265,10 +266,15 @@ impl CPU {
 
 	// 7xkk - ADD Vx, byte -> Set Vx = Vx + kk.
 	// Adds the value kk to the value of register Vx, then stores the result in Vx.
-	fn op_7xkk(&mut self, x: usize, kk: u8) -> ProgramCounter {
+	// Fixed due to overflow
+    fn op_7xkk(&mut self, x: usize, kk: u8) -> ProgramCounter {
 		// TODO: Might have type mismatch
-		self.v[x] += kk;
-		ProgramCounter::Next
+        let vx = self.v[x] as u16; // ??
+        let val = kk as u16;
+        self.v[x] = (vx + val) as u8;
+		//self.v[x] += kk;
+		
+        ProgramCounter::Next
 	}
 
 	// 8xy0 - LD Vx, Vy -> Set Vx = Vy.
@@ -303,13 +309,13 @@ impl CPU {
 	// 8xy4 - ADD Vx, Vy -> Set Vx = Vx + Vy, set VF = carry.
 	// The values of Vx and Vy are added together. If the result is greater than 8 bits (i.e., > 255,) VF is set to 1, otherwise 0. Only the lowest 8 bits of the result are kept, and stored in Vx.
 	fn op_8xy4(&mut self, x: usize, y: usize) -> ProgramCounter {
-		let vx = self.v[x] as u16;
+		let vx = self.v[x] as u16; // set as u16 to accommodate overflow
 		let vy = self.v[y] as u16;
 		let res = vx + vy;
 		let carry = if res > 255 { 1 } else { 0 };
-		let res = res & 0x0011; //keep only last 2 bytes
+		//let res = res & 0x0011; //keep only last 2 bytes
 		self.v[x] = res as u8;
-		self.v[0xF] = carry;
+		self.v[0x0f] = carry;
 	    ProgramCounter::Next
 	}
 
@@ -340,7 +346,7 @@ impl CPU {
 	// 8xyE - SHL Vx {, Vy} -> Set Vx = Vx SHL 1.
 	// If the most-significant bit of Vx is 1, then VF is set to 1, otherwise to 0. Then Vx is multiplied by 2.
 	fn op_8xye(&mut self, x: usize) -> ProgramCounter {
-		self.v[0xF] = self.v[x] & 0b10000000 >> 7; // TODO: Change binary to Hexadecimal for uniformity
+		self.v[0xF] = (self.v[x] & 0x80) >> 7; // TODO: Change binary to Hexadecimal for uniformity
 		self.v[x] = self.v[x] << 1;
 		ProgramCounter::Next
 	}
@@ -382,34 +388,23 @@ impl CPU {
 
 	// Dxyn - DRW Vx, Vy, nibble
 	// Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision.
-    fn op_dxyn(&mut self, x: usize, y: usize, height: u8) -> ProgramCounter {
-        let x_coord = self.v[x];
-        let y_coord = self.v[y];
-
-        let mut y_offset = 0;
-
-        while y_offset < height {
-            let ram_byte = self.ram[(self.i + y_offset as u16) as usize];
-            let mut x_offset = 0;
-
-            while x_offset < 8 {
-                // Wrap around the other side
-                let pixel_x = (x_coord + x_offset) % (CHIP8_WIDTH as u8);
-                let pixel_y = (y_coord + y_offset) % (CHIP8_HEIGHT as u8);
-
-                if ram_byte & (0x80 >> x_offset) != 0 { // Checking every bit in ram_byte
-                    if self.vram[pixel_x as usize][pixel_y as usize] == 1 {
-                        self.v[0xF] = 1; // 1 XOR 1 = 0
-                    }
-                    self.vram[pixel_x as usize][pixel_y as usize] ^= 1;
-                }
-                x_offset += 1;
+    fn op_dxyn(&mut self, x: usize, y: usize, n: usize) -> ProgramCounter {
+        self.v[0x0f] = 0;
+        for byte in 0..n { // check each byte in memory
+            // % operator allows wrapping around screen
+            let y = (self.v[y] as usize + byte) % CHIP8_HEIGHT;
+            for bit in 0..8 { 
+                // Check each bit in a byte
+                let x = (self.v[x] as usize + bit) % CHIP8_WIDTH;
+                let color = (self.ram[self.i as usize + byte] >> (7 - bit)) & 1;
+                self.v[0x0f] |= color & self.vram[y][x];
+                self.vram[y][x] ^= color;
             }
-            y_offset += 1;
         }
-
+        self.vram_changed = true;
         ProgramCounter::Next
-    }
+    }    
+
 	// The interpreter reads n bytes from memory, starting at the address stored in I. These bytes are then displayed as sprites on screen at coordinates (Vx, Vy). Sprites are XORed onto the existing screen. If this causes any pixels to be erased, VF is set to 1, otherwise it is set to 0. If the sprite is positioned so part of it is outside the coordinates of the display, it wraps around to the opposite side of the screen. See instruction 8xy3 for more information on XOR, and section 2.4, Display, for more information on the Chip-8 screen and sprites.
 
 
@@ -447,23 +442,9 @@ impl CPU {
     // Fx0A - LD Vx, K
     // Wait for a key press, store the value of the key in Vx.
     fn op_fx0a(&mut self, x: usize) -> ProgramCounter {
-        let curr_key = 0;
-        let arr_len = self.keypad.len();
-        let mut pressed = false;
-
-        while curr_key < arr_len {
-            if self.keypad[curr_key] {
-                self.v[x] = curr_key as u8;
-                pressed = true;
-                break;
-            }
-        }
-
-        if pressed {
-            ProgramCounter::Next // only increment if a key is pressed.
-        } else {
-            ProgramCounter::Stay // if not, stay at the same program counter
-        }
+        self.keypad_waiting = true;
+        self.keypad_register = x;
+        ProgramCounter::Next    
     }
 
     // Fx15 - LD DT, Vx
@@ -483,13 +464,14 @@ impl CPU {
     // Set I = I + Vx.
     fn op_fx1e(&mut self, x: usize) -> ProgramCounter {
         self.i += self.v[x] as u16;
+        self.v[0x0f] = if self.i > 0x0F00 { 1 } else { 0 };
         ProgramCounter::Next
     }
 
     // Fx29 - LD F, Vx
     // Set I = location of sprite for digit Vx.
     fn op_fx29(&mut self, x: usize) -> ProgramCounter {
-        self.i = (self.v[x] * 5) as u16; // position of any digit Vx lies at fontset[Vx * 5]
+        self.i = (self.v[x] as u16) * 5; // position of any digit Vx lies at fontset[Vx * 5]
         ProgramCounter::Next
     }
 
@@ -498,9 +480,9 @@ impl CPU {
     fn op_fx33(&mut self, x: usize) -> ProgramCounter {
         let vx = self.v[x];
 
-        self.ram[self.i as usize] = vx / (100 as u8); // hundreds digit
-        self.ram[(self.i + 1) as usize] = (vx / (10 as u8)) % (10 as u8); // tens digit
-        self.ram[(self.i + 2) as usize] = vx % (10 as u8); // ones digit
+        self.ram[self.i as usize] = vx / 100; // hundreds digit
+        self.ram[(self.i + 1) as usize] = (vx / 10) % 10; // tens digit
+        self.ram[(self.i + 2) as usize] = vx % 10; // ones digit
 
         ProgramCounter::Next
     }
@@ -508,11 +490,8 @@ impl CPU {
     // Fx55 - LD [I], Vx
     // Store registers V0 through Vx in memory starting at location I.
     fn op_fx55(&mut self, x: usize) -> ProgramCounter {
-        let reg_index: usize = 0;
-
-        while reg_index <= x {
-            self.ram[(self.i + reg_index as u16) as usize] = 
-                                    self.v[reg_index];
+        for i in 0..(x+1) {
+            self.ram[(self.i as usize) + i] = self.v[i];
         }
 
         ProgramCounter::Next
@@ -523,10 +502,8 @@ impl CPU {
     // Fx65 - LD Vx, [I]
     // Read registers V0 through Vx from memory starting at location I.
     fn op_fx65(&mut self, x: usize) -> ProgramCounter {
-        let reg_index = 0;
-
-        while reg_index <= x {
-            self.v[reg_index] = self.ram[(self.i + reg_index as u16) as usize];
+        for i in 0..(x+1) {
+            self.v[i] = self.ram[self.i as usize + i];
         }
 
         ProgramCounter::Next
