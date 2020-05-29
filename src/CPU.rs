@@ -68,7 +68,7 @@ impl CPU {
 	}
 
 	pub fn load_program(&mut self, program: Vec<u8>) {
-		let mut data = vec![0; 0x200];
+		let mut data = Vec::new(); // changed from vec![0;0x200] to new Vec
 		for byte in program {
 			data.push(byte);
 		}
@@ -142,7 +142,7 @@ impl CPU {
 
 		let x = parts.1 as usize;
 		let y = parts.2 as usize;
-		let n = parts.3;
+		let n = parts.3 as usize;
 		let kk = (parts.2 << 4) as u8 | parts.3;
 		let nnn = ((parts.1 as u16) << 8) | ((parts.2 as u16) << 4) | (parts.1 as u16);
 
@@ -382,34 +382,22 @@ impl CPU {
 
 	// Dxyn - DRW Vx, Vy, nibble
 	// Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision.
-    fn op_dxyn(&mut self, x: usize, y: usize, height: u8) -> ProgramCounter {
-        let x_coord = self.v[x];
-        let y_coord = self.v[y];
+    fn op_dxyn(&mut self, x: usize, y: usize, n: usize) -> ProgramCounter {
+        self.v[0x0f] = 0;
+        for byte in 0..n {
+            let y = (self.v[y] as usize + byte) % CHIP8_HEIGHT;
+            for bit in 0..8 {
+                let x = (self.v[x] as usize + bit) % CHIP8_WIDTH;
+                let color = (self.ram[self.i as usize + byte] >> (7 - bit)) & 1;
+                self.v[0x0f] |= color & self.vram[y][x];
+                self.vram[y][x] ^= color;
 
-        let mut y_offset = 0;
-
-        while y_offset < height {
-            let ram_byte = self.ram[(self.i + y_offset as u16) as usize];
-            let mut x_offset = 0;
-
-            while x_offset < 8 {
-                // Wrap around the other side
-                let pixel_x = (x_coord + x_offset) % (CHIP8_WIDTH as u8);
-                let pixel_y = (y_coord + y_offset) % (CHIP8_HEIGHT as u8);
-
-                if ram_byte & (0x80 >> x_offset) != 0 { // Checking every bit in ram_byte
-                    if self.vram[pixel_x as usize][pixel_y as usize] == 1 {
-                        self.v[0xF] = 1; // 1 XOR 1 = 0
-                    }
-                    self.vram[pixel_x as usize][pixel_y as usize] ^= 1;
-                }
-                x_offset += 1;
             }
-            y_offset += 1;
         }
-
+        self.vram_changed = true;
         ProgramCounter::Next
-    }
+    }    
+
 	// The interpreter reads n bytes from memory, starting at the address stored in I. These bytes are then displayed as sprites on screen at coordinates (Vx, Vy). Sprites are XORed onto the existing screen. If this causes any pixels to be erased, VF is set to 1, otherwise it is set to 0. If the sprite is positioned so part of it is outside the coordinates of the display, it wraps around to the opposite side of the screen. See instruction 8xy3 for more information on XOR, and section 2.4, Display, for more information on the Chip-8 screen and sprites.
 
 
