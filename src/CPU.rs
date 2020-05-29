@@ -33,7 +33,6 @@ pub struct OutputState<'a> {
 
 enum ProgramCounter {
 	// what to do with pointer
-    Stay,
 	Next,
 	Skip,
 	Jump(u16), // changed jump to u16 becaue pc is only 16 bits
@@ -67,7 +66,7 @@ impl CPU {
 		}
 	}
 
-	pub fn load_program(&mut self, program: Vec<u8>) {
+	pub fn load_program(&mut self, program: &[u8]) { // Changed here
 		let mut data = Vec::new(); // changed from vec![0;0x200] to new Vec
 		for byte in program {
 			data.push(byte);
@@ -140,6 +139,8 @@ impl CPU {
 			(opcode & 0x00F0) >> 4 as u8,
 			(opcode & 0x000F) as u8,
 		);
+        
+        println!("{}", format!("Running opcode {:x}", opcode)); // debug
 
         let x = parts.1 as usize;
 		let y = parts.2 as usize;
@@ -190,7 +191,6 @@ impl CPU {
 			ProgramCounter::Next => self.pc += 2,
 			ProgramCounter::Skip => self.pc += 4,
 			ProgramCounter::Jump(addr) => self.pc = addr,
-            ProgramCounter::Stay => self.pc += 0,
 		}
 	}
 
@@ -266,7 +266,8 @@ impl CPU {
 
 	// 7xkk - ADD Vx, byte -> Set Vx = Vx + kk.
 	// Adds the value kk to the value of register Vx, then stores the result in Vx.
-	fn op_7xkk(&mut self, x: usize, kk: u8) -> ProgramCounter {
+	// Fixed due to overflow
+    fn op_7xkk(&mut self, x: usize, kk: u8) -> ProgramCounter {
 		// TODO: Might have type mismatch
         let vx = self.v[x] as u16; // ??
         let val = kk as u16;
@@ -479,9 +480,9 @@ impl CPU {
     fn op_fx33(&mut self, x: usize) -> ProgramCounter {
         let vx = self.v[x];
 
-        self.ram[self.i as usize] = vx / (100 as u8); // hundreds digit
-        self.ram[(self.i + 1) as usize] = (vx / (10 as u8)) % (10 as u8); // tens digit
-        self.ram[(self.i + 2) as usize] = vx % (10 as u8); // ones digit
+        self.ram[self.i as usize] = vx / 100; // hundreds digit
+        self.ram[(self.i + 1) as usize] = (vx / 10) % 10; // tens digit
+        self.ram[(self.i + 2) as usize] = vx % 10; // ones digit
 
         ProgramCounter::Next
     }

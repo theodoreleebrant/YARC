@@ -30,7 +30,7 @@ fn main() {
     let mut input_driver = InputDriver::new(&sdl_context);
     let mut cpu = CPU::new();
 
-    cpu.load_program((&cartridge_driver.rom).to_vec());
+    cpu.load_program(&cartridge_driver.rom);
 
     while let Ok(keypad) = input_driver.poll() {
 
