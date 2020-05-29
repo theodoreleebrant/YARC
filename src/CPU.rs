@@ -36,6 +36,7 @@ enum ProgramCounter {
 	Next,
 	Skip,
 	Jump(u16), // changed jump to u16 becaue pc is only 16 bits
+    Stay
 }
 
 
@@ -73,7 +74,7 @@ impl CPU {
 		}
 		for (i, &byte) in data.iter().enumerate() {
 			// TODO: Implement a check: address should be less than 0x1000
-			self.ram[0x200 + i] = byte;  //programs start at 0x200
+			self.ram[0x200 + i] = *byte;  //programs start at 0x200
 		}
 	}
 
@@ -140,7 +141,7 @@ impl CPU {
 			(opcode & 0x000F) as u8,
 		);
         
-        println!("{}", format!("Running opcode {:x}", opcode)); // debug
+        //println!("{}", format!("Running opcode {:x}", opcode)); // debug
 
         let x = parts.1 as usize;
 		let y = parts.2 as usize;
@@ -191,7 +192,8 @@ impl CPU {
 			ProgramCounter::Next => self.pc += 2,
 			ProgramCounter::Skip => self.pc += 4,
 			ProgramCounter::Jump(addr) => self.pc = addr,
-		}
+		    ProgramCounter::Stay => self.pc += 0,
+        }
 	}
 
 	// OPCODES HERE
@@ -444,7 +446,22 @@ impl CPU {
     fn op_fx0a(&mut self, x: usize) -> ProgramCounter {
         self.keypad_waiting = true;
         self.keypad_register = x;
-        ProgramCounter::Next
+        
+        let mut pressed = false;
+
+        for key in 0..self.keypad.len() {
+            if self.keypad[key] {
+                self.v[x] = key as u8;
+                pressed = true;
+                break;
+            }
+        }
+        
+        if pressed {
+            ProgramCounter::Next
+        } else {
+            ProgramCounter::Stay
+        }
     }
 
     // Fx15 - LD DT, Vx
