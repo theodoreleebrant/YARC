@@ -41,10 +41,6 @@ enum ProgramCounter {
 
 
 impl CPU {
-	pub fn confirm_import() {
-        println!("Imported CPU successfully");
-    }
-
     pub fn new() -> Self {
 		let mut ram = [0u8; CHIP8_RAM];
 
@@ -72,7 +68,7 @@ impl CPU {
 	}
 
 	pub fn load_program(&mut self, program: Vec<u8>) {
-		let data = vec![0; 0x200];
+		let mut data = vec![0; 0x200];
 		for byte in program {
 			data.push(byte);
 		}

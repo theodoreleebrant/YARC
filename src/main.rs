@@ -16,8 +16,6 @@ pub const CHIP8_HEIGHT: usize = 32;
 pub const CHIP8_RAM: usize = 4096;
 
 fn main() {
-    drivers::confirm_import();
-
     let sleep_duration = Duration::from_millis(2);
 
     let sdl_context = sdl2::init().unwrap();
@@ -32,7 +30,7 @@ fn main() {
     let mut input_driver = InputDriver::new(&sdl_context);
     let mut cpu = CPU::new();
 
-    cpu.load_program(&cartridge_driver.rom);
+    cpu.load_program((&cartridge_driver.rom).to_vec());
 
     while let Ok(keypad) = input_driver.poll() {
 
