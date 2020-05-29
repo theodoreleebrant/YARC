@@ -53,7 +53,6 @@ impl GraphicDriver {
                         .fill_rect(Rect::new(x as i32, y as i32, SCALE_FACTOR, SCALE_FACTOR)); // want to fill rectangle (pixel) at that particular address
             }
         }
-        
         self.canvas.present(); // Bring canvas to front
         
     }

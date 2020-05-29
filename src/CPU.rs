@@ -79,7 +79,7 @@ impl CPU {
 	}
 
 	
-
+    // Needs the most debugging
 	pub fn tick(&mut self, keypad: [bool; 16]) -> OutputState {
 		// Initialisation
 		self.keypad = keypad;
@@ -87,6 +87,7 @@ impl CPU {
 
 		// Each tick, either (input from keypad) or (decrement timer & do opcode)
 		if self.keypad_waiting {
+            println!("Waiting for keyboard");
 			for i in 0..keypad.len() {
 				if keypad[i] {
 					self.keypad_waiting = false;				// Stop the keypad_waiting
@@ -140,7 +141,7 @@ impl CPU {
 			(opcode & 0x000F) as u8,
 		);
 
-		let x = parts.1 as usize;
+        let x = parts.1 as usize;
 		let y = parts.2 as usize;
 		let n = parts.3 as usize;
 		let kk = (parts.2 << 4) as u8 | parts.3;
@@ -267,8 +268,12 @@ impl CPU {
 	// Adds the value kk to the value of register Vx, then stores the result in Vx.
 	fn op_7xkk(&mut self, x: usize, kk: u8) -> ProgramCounter {
 		// TODO: Might have type mismatch
-		self.v[x] += kk;
-		ProgramCounter::Next
+        let vx = self.v[x] as u16; // ??
+        let val = kk as u16;
+        self.v[x] = (vx + val) as u8;
+		//self.v[x] += kk;
+		
+        ProgramCounter::Next
 	}
 
 	// 8xy0 - LD Vx, Vy -> Set Vx = Vy.
@@ -436,23 +441,9 @@ impl CPU {
     // Fx0A - LD Vx, K
     // Wait for a key press, store the value of the key in Vx.
     fn op_fx0a(&mut self, x: usize) -> ProgramCounter {
-        let curr_key = 0;
-        let arr_len = self.keypad.len();
-        let mut pressed = false;
-
-        while curr_key < arr_len {
-            if self.keypad[curr_key] {
-                self.v[x] = curr_key as u8;
-                pressed = true;
-                break;
-            }
-        }
-
-        if pressed {
-            ProgramCounter::Next // only increment if a key is pressed.
-        } else {
-            ProgramCounter::Stay // if not, stay at the same program counter
-        }
+        self.keypad_waiting = true;
+        self.keypad_register = x;
+        ProgramCounter::Next
     }
 
     // Fx15 - LD DT, Vx
@@ -472,13 +463,14 @@ impl CPU {
     // Set I = I + Vx.
     fn op_fx1e(&mut self, x: usize) -> ProgramCounter {
         self.i += self.v[x] as u16;
+        self.v[0x0f] = if self.i > 0x0F00 { 1 } else { 0 };
         ProgramCounter::Next
     }
 
     // Fx29 - LD F, Vx
     // Set I = location of sprite for digit Vx.
     fn op_fx29(&mut self, x: usize) -> ProgramCounter {
-        self.i = (self.v[x] * 5) as u16; // position of any digit Vx lies at fontset[Vx * 5]
+        self.i = (self.v[x] as u16) * 5; // position of any digit Vx lies at fontset[Vx * 5]
         ProgramCounter::Next
     }
 
@@ -497,11 +489,8 @@ impl CPU {
     // Fx55 - LD [I], Vx
     // Store registers V0 through Vx in memory starting at location I.
     fn op_fx55(&mut self, x: usize) -> ProgramCounter {
-        let reg_index: usize = 0;
-
-        while reg_index <= x {
-            self.ram[(self.i + reg_index as u16) as usize] = 
-                                    self.v[reg_index];
+        for i in 0..(x+1) {
+            self.ram[(self.i as usize) + i] = self.v[i];
         }
 
         ProgramCounter::Next
@@ -512,10 +501,8 @@ impl CPU {
     // Fx65 - LD Vx, [I]
     // Read registers V0 through Vx from memory starting at location I.
     fn op_fx65(&mut self, x: usize) -> ProgramCounter {
-        let reg_index = 0;
-
-        while reg_index <= x {
-            self.v[reg_index] = self.ram[(self.i + reg_index as u16) as usize];
+        for i in 0..(x+1) {
+            self.v[i] = self.ram[self.i as usize + i];
         }
 
         ProgramCounter::Next
