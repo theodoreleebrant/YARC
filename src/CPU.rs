@@ -384,14 +384,15 @@ impl CPU {
 	// Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision.
     fn op_dxyn(&mut self, x: usize, y: usize, n: usize) -> ProgramCounter {
         self.v[0x0f] = 0;
-        for byte in 0..n {
+        for byte in 0..n { // check each byte in memory
+            // % operator allows wrapping around screen
             let y = (self.v[y] as usize + byte) % CHIP8_HEIGHT;
-            for bit in 0..8 {
+            for bit in 0..8 { 
+                // Check each bit in a byte
                 let x = (self.v[x] as usize + bit) % CHIP8_WIDTH;
                 let color = (self.ram[self.i as usize + byte] >> (7 - bit)) & 1;
                 self.v[0x0f] |= color & self.vram[y][x];
                 self.vram[y][x] ^= color;
-
             }
         }
         self.vram_changed = true;
