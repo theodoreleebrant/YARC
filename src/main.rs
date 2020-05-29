@@ -16,7 +16,7 @@ pub const CHIP8_HEIGHT: usize = 32;
 pub const CHIP8_RAM: usize = 4096;
 
 fn main() {
-    let sleep_duration = Duration::from_millis(2);
+    let sleep_duration = Duration::from_millis(1);
 
     let sdl_context = sdl2::init().unwrap();
     // Handle error
