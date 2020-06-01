@@ -1,7 +1,7 @@
 # Yet another (Rust) CHIP-8 emulator
 
 This is a CHIP-8 emulator written in Rust. Done for emulation proof of concept in Orbital 2020!
-This version is for Mac OS/Linux due to sdl2 incompatibility. For Windows version, refer [here](www.google.com)
+This version is for Mac OS/Linux due to sdl2 incompatibility. For Windows version, refer [here](https://github.com/theodoreleebrant/YARC-windows)
 
 Tests with games show that it works as expected.
 
