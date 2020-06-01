@@ -1,6 +1,7 @@
 # Yet another (Rust) CHIP-8 emulator
 
 This is a CHIP-8 emulator written in Rust. Done for emulation proof of concept in Orbital 2020!
+This version is for Mac OS/Linux due to sdl2 incompatibility. For Windows version, refer [here](www.google.com)
 
 Tests with games show that it works as expected.
 
@@ -10,7 +11,7 @@ Tests with games show that it works as expected.
 ## Requirements
 You will need to install Rust, as well as sdl2 with headers.  
 Instruction to install Rust can be seen at the [Rust installation guide](https://www.rust-lang.org/tools/install)  
-Instruction to install sdl2 can be seen at the [SDL installation guid](https://wiki.libsdl.org/Installation)
+To install sdl2:
 
 ## Run the program
 
