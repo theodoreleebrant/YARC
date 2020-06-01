@@ -11,15 +11,15 @@ Tests with games show that it works as expected.
 ## Requirements
 You will need to install Rust, as well as sdl2 with headers.  
 Instruction to install Rust can be seen at the [Rust installation guide](https://www.rust-lang.org/tools/install)  
-To install sdl2, run one of the following commands in your command line:  
+Instruction to install sdl2:
 
-> If Homebrew is installed on your computer
+> Homebrew
 
 `brew install sdl2`
 
-> If not
+> apt
 
-(Debian-based OS, tested on Ubuntu 20.04): `sudo apt-get install libsdl2-dev libsdl2-gfx-dev`  
+`sudo apt-get install libsdl2-dev libsdl2-gfx-dev`  
 
 ## Run the program
 
