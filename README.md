@@ -4,4 +4,4 @@ This is a CHIP-8 emulator written in Rust. Done for emulation proof of concept i
 
 ## Requirements
 You will need to install Rust, as well as sdl2 with headers. 
-Instruction to install Rust can be seen [here]9https://www.rust-lang.org/tools/install).
+Instruction to install Rust can be seen [here](https://www.rust-lang.org/tools/install).
