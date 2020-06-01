@@ -2,7 +2,7 @@
 
 This is a CHIP-8 emulator written in Rust. Done for emulation proof of concept in Orbital 2020!
 
-Our attempt to emulate the Chip-8 Interpreter through low-level emulation. Tests with games show that it works as expected.
+Tests with games show that it works as expected.
 
 <a href="https://i.imgur.com/4l3gxNh.png"><img src="https://i.imgur.com/4l3gxNh.png" title="PONG Chip-8 Game" alt="PONG game test"></a>
 
