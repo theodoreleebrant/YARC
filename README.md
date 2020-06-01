@@ -8,8 +8,9 @@ Tests with games show that it works as expected.
 
 
 ## Requirements
-You will need to install Rust, as well as sdl2 with headers. 
-Instruction to install Rust can be seen at the [Installation guide](https://www.rust-lang.org/tools/install)
+You will need to install Rust, as well as sdl2 with headers.  
+Instruction to install Rust can be seen at the [Rust installation guide](https://www.rust-lang.org/tools/install)  
+Instruction to install sdl2 can be seen at the [SDL installation guid](https://wiki.libsdl.org/Installation)
 
 ## Run the program
 
