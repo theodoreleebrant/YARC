@@ -11,7 +11,7 @@ Tests with games show that it works as expected.
 You will need to install Rust, as well as sdl2 with headers. 
 Instruction to install Rust can be seen at the [Installation guide](https://www.rust-lang.org/tools/install)
 
-### Run the program
+## Run the program
 
 You can run any game included by running the following in terminal:
 `````
