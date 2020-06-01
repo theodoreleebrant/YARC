@@ -23,29 +23,32 @@ cargo run filename
 
 For example:
 `````
-cargo run pong.c8
+cargo run PONG
 `````
-Games are included in the 'games' folder.
 
 ### Game instructions:
 > Pong 
 
-Left bar up: 1
-
-Left bar down: q  
-
-Right bar up: 4
-
-Right bar down: r
+Left bar up: 1  
+Left bar down: Q  
+Right bar up: 4  
+Right bar down: R
 
 
 > Space invader
 
-Move left: q
-
-Shoot: w
-
-Move right: e
+Move left: Q  
+Shoot: W  
+Move right: E
 
 
+### About CHIP8 controls
+CHIP8 takes in key presses from 16 keypads: 
+```
+1 2 3 4
+Q W E R
+A S D F
+Z X C V
+```
+If any of the games do not have instruction, play around with the above keys!
 
