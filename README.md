@@ -12,6 +12,7 @@ Tests with games show that it works as expected.
 You will need to install Rust, as well as sdl2 with headers.  
 Instruction to install Rust can be seen at the [Rust installation guide](https://www.rust-lang.org/tools/install)  
 To install sdl2:
+(Debian-based OS, tested on Ubuntu 20.04): `sudo apt-get install libsdl2-dev libsdl2-gfx-dev`
 
 ## Run the program
 
