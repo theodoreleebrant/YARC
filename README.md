@@ -17,9 +17,9 @@ Instruction to install sdl2:
 
 `brew install sdl2`
 
-> apt
+> Or using apt
 
-`sudo apt-get install libsdl2-dev libsdl2-gfx-dev`  
+`sudo apt-get install libsdl2-dev libsdl2-gfx-dev`
 
 ## Run the program
 
